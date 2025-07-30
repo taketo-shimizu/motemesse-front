@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@auth0/nextjs-auth0": "^4.8.0",
+    "@auth0/nextjs-auth0": "^3.8.0",
     "@prisma/client": "^6.12.0",
     "axios": "^1.11.0",
     "next": "15.4.4",

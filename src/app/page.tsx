@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Navbar from '@/components/navigation/Navbar'
 
 export default function Home() {
   const [message] = useState('Hello World from モテメッセ')
@@ -22,7 +23,9 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-primary to-secondary flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary to-secondary">
+      <Navbar />
+      <main className="flex items-center justify-center p-4 min-h-[calc(100vh-4rem)]">
       <div className="card w-full max-w-2xl bg-base-100 shadow-2xl">
         <div className="card-body text-center">
           <h1 className="text-5xl font-bold text-primary mb-4">モテメッセ</h1>
@@ -62,6 +65,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-    </main>
+      </main>
+    </div>
   )
 }
