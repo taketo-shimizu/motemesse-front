@@ -86,8 +86,24 @@ export async function syncAuth0User(auth0User: any): Promise<DatabaseUser | null
     };
 
     if (dbUser) {
-      // 既存ユーザーを更新
-      return await updateUser(dbUser.id, userData);
+      // 既存ユーザーを更新（メールアドレスが変更された場合も考慮）
+      const updateData: Partial<CreateUserData> = {
+        name: userData.name,
+        picture: userData.picture,
+        emailVerified: userData.emailVerified
+      };
+      
+      // メールアドレスが変更された場合は更新
+      if (dbUser.email !== userData.email) {
+        updateData.email = userData.email;
+      }
+      
+      // Auth0 IDが未設定の場合は更新
+      if (!dbUser.auth0Id && userData.auth0Id) {
+        updateData.auth0Id = userData.auth0Id;
+      }
+      
+      return await updateUser(dbUser.id, updateData);
     } else {
       // 新規ユーザーを作成
       return await createUser(userData);
