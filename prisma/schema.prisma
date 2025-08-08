@@ -20,10 +20,27 @@ model User {
   auth0Id     String?  @unique @map("auth0_id") // Auth0のユーザーIDを保存
   picture     String?  // プロフィール画像URL
   emailVerified Boolean @default(false) @map("email_verified")
+  age         Int?     // 年齢
+  job         String?  // 職業
+  hobby       String?  // 趣味
+  residence   String?  // 居住地
+  workplace   String?  @map("work_place") // 勤務地
+  bloodType   String?  @map("blood_type") // 血液型
+  education   String?  // 学歴
+  workType    String?  @map("work_type") // 仕事の種類
+  holiday     String?  // 休日
+  marriageHistory String? @map("marriage_history") // 結婚歴
+  hasChildren String?  @map("has_children") // 子供の有無
+  smoking     String?  // 煙草
+  drinking    String?  // お酒
+  livingWith  String?  @map("living_with") // 一緒に住んでいる人
+  marriageIntention String? @map("marriage_intention") // 結婚に対する意思
+  selfIntroduction String? @map("self_introduction") // 自己紹介
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   targets     Target[]
+  conversations Conversation[]
 
   @@map("users")
 }
@@ -32,13 +49,42 @@ model Target {
   id          Int      @id @default(autoincrement())
   name        String
   userId      Int      @map("user_id")
-  job         String?
-  hobby       String?
-  personality String?
+  age         Int?     // 年齢
+  job         String?  // 職業
+  hobby       String?  // 趣味
+  residence   String?  // 居住地
+  workplace   String?  @map("work_place") // 勤務地
+  bloodType   String?  @map("blood_type") // 血液型
+  education   String?  // 学歴
+  workType    String?  @map("work_type") // 仕事の種類
+  holiday     String?  // 休日
+  marriageHistory String? @map("marriage_history") // 結婚歴
+  hasChildren String?  @map("has_children") // 子供の有無
+  smoking     String?  // 煙草
+  drinking    String?  // お酒
+  livingWith  String?  @map("living_with") // 一緒に住んでいる人
+  marriageIntention String? @map("marriage_intention") // 結婚に対する意思
+  selfIntroduction String? @map("self_introduction") // 自己紹介
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   user        User     @relation(fields: [userId], references: [id])
+  conversations Conversation[]
 
   @@map("targets")
+}
+
+model Conversation {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  targetId    Int      @map("target_id")
+  femaleMessage String @map("female_message") // 女性からのメッセージ
+  maleReply   String   @map("male_reply")     // 男性の返信
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user        User     @relation(fields: [userId], references: [id])
+  target      Target   @relation(fields: [targetId], references: [id])
+
+  @@map("conversations")
 }

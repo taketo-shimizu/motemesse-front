@@ -11,25 +11,24 @@ export default function SideMenu() {
   const router = useRouter();
 
   const handleLogout = () => {
-    router.push('/api/auth/logout');
+    window.location.href = '/api/auth/logout';
   };
 
   const handleProfileSettings = () => {
     router.push('/setting');
-    //closeMenu();
+    closeMenu();
   };
 
   const handleChatHistory = () => {
     router.push('/chat');
-    //closeMenu();
+    closeMenu();
   };
 
   return (
     <div
       id="settingsPanel"
-      className={`fixed left-0 top-0 h-full w-80 bg-white shadow-xl z-50 p-6 transition-transform duration-300 ${
-        isOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}
+      className={`fixed left-0 top-0 h-full w-80 bg-white shadow-xl z-50 p-6 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
     >
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold text-gray-800">設定</h2>
@@ -52,8 +51,8 @@ export default function SideMenu() {
           </select>
         </div>
 
-        <button 
-          id="profileSettingsBtn" 
+        <button
+          id="profileSettingsBtn"
           onClick={handleChatHistory}
           className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 px-4 rounded-lg transition-colors flex items-center"
         >
@@ -61,8 +60,8 @@ export default function SideMenu() {
           チャット履歴
         </button>
 
-        <button 
-          id="profileSettingsBtn" 
+        <button
+          id="profileSettingsBtn"
           onClick={handleProfileSettings}
           className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 px-4 rounded-lg transition-colors flex items-center"
         >
@@ -74,7 +73,7 @@ export default function SideMenu() {
           <FiTrash2 className="w-4 h-4 mr-2" />
           履歴を削除
         </button>
-        
+
         <button
           onClick={handleLogout}
           className="w-full bg-gray-800 hover:bg-gray-900 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center mt-6"

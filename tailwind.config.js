@@ -8,7 +8,11 @@ const config = {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        pinkCustom: '#f8bbd9',
+      },
+    },
   },
   plugins: [daisyui],
   daisyui: {
