@@ -36,6 +36,7 @@ model User {
   livingWith  String?  @map("living_with") // 一緒に住んでいる人
   marriageIntention String? @map("marriage_intention") // 結婚に対する意思
   selfIntroduction String? @map("self_introduction") // 自己紹介
+  tone        Int      @default(0) // トーン設定
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 

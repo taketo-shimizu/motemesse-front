@@ -5,10 +5,12 @@ import { useSideMenuStore } from '@/store/sideMenu';
 import { FiX, FiUser, FiTrash2, FiLogOut } from 'react-icons/fi';
 import { CiChat1 } from 'react-icons/ci';
 import { MdChatBubbleOutline } from 'react-icons/md';
+import { useUserStore } from '@/store/user';
 
 export default function SideMenu() {
   const { isOpen, closeMenu } = useSideMenuStore();
   const router = useRouter();
+  const { user, updateTone } = useUserStore();
 
   const handleLogout = () => {
     window.location.href = '/api/auth/logout';
@@ -22,6 +24,15 @@ export default function SideMenu() {
   const handleChatHistory = () => {
     router.push('/chat');
     closeMenu();
+  };
+
+  const handleToneChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const tone = parseInt(e.target.value);
+    try {
+      await updateTone(tone);
+    } catch (error) {
+      console.error('Failed to update tone:', error);
+    }
   };
 
   return (
@@ -44,10 +55,14 @@ export default function SideMenu() {
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">返信のトーン</label>
-          <select id="replyTone" className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="casual">カジュアル</option>
-            <option value="polite">丁寧</option>
-            <option value="humorous">ユーモア</option>
+          <select
+            id="replyTone"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={user?.tone ?? 0}
+            onChange={handleToneChange}
+          >
+            <option value={0}>敬語</option>
+            <option value={1}>タメ口</option>
           </select>
         </div>
 

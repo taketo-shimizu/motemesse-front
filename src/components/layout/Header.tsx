@@ -1,12 +1,18 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useSideMenuStore } from '@/store/sideMenu';
 import { useTargetsStore } from '@/store/targets';
 import { FiSettings, FiPlus, FiTrash2 } from 'react-icons/fi';
 
 export default function Header() {
+  const [mounted, setMounted] = useState(false);
   const { openMenu } = useSideMenuStore();
   const { targets, selectedTargetId, selectTarget, fetchTargets } = useTargetsStore();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleAddClick = async () => {
     const name = prompt('女性の名前を入力してください');
@@ -76,7 +82,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+    <header className="bg-white shadow-sm border-b border-gray-200 px-4 py-3 sm:flex sm:items-center sm:justify-between">
       <div className="flex items-center space-x-4">
         <button
           id="settingsBtn"
@@ -88,16 +94,16 @@ export default function Header() {
         <h1 className="text-xl font-semibold text-gray-800">モテメッセ</h1>
       </div>
 
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-3 mt-4 sm:mt-0">
         <select
           id="womanSelect"
-          value={selectedTargetId || ''}
+          value={mounted ? (selectedTargetId?.toString() || '') : ''}
           onChange={handleSelectChange}
           className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">女性を選択...</option>
-          {targets.map((target) => (
-            <option key={target.id} value={target.id}>
+          {mounted && targets.map((target) => (
+            <option key={target.id} value={target.id.toString()}>
               {target.name}
             </option>
           ))}

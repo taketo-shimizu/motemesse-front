@@ -176,6 +176,25 @@ export default function Chat() {
     }
   };
 
+  // メッセージをコピーする関数
+  const handleCopyMessage = async (message: string) => {
+    try {
+      await navigator.clipboard.writeText(message);
+      console.log('メッセージがコピーされました:', message);
+    } catch (error) {
+      console.error('コピーに失敗しました:', error);
+      // フォールバック: 古いブラウザ対応
+      const textArea = document.createElement('textarea');
+      textArea.value = message;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
+  };
+
+  console.log(conversations)
+
   return (
     <DefaultLayout>
       <div className="flex flex-col h-full">
@@ -209,22 +228,26 @@ export default function Chat() {
                 <div key={conversation.id} className="space-y-3">
                   {/* 女性からのメッセージ */}
                   <div className="flex justify-start">
-                    <div className="max-w-xs lg:max-w-md bg-pinkCustom rounded-lg shadow p-3">
+                    <div className="max-w-xs lg:max-w-md bg-pink-gradient rounded-2xl shadow p-3">
+                      <div className="text-xs text-gray-500 mb-1">{conversation.target.name}</div>
                       <div className="text-gray-800">{conversation.femaleMessage}</div>
                     </div>
                   </div>
 
                   {/* 男性の返信 */}
                   <div className="flex justify-end">
-                    <div className="max-w-xs lg:max-w-md bg-blue-500 text-white rounded-lg shadow p-3">
-                      <div className="text-xs text-blue-100 mb-1">あなた</div>
-                      <div>{conversation.maleReply}</div>
+                    <div className="max-w-xs lg:max-w-md">
+                      <div className="bg-gray-gradient text-gray-800 rounded-2xl shadow-sm p-3">
+                        <div className="text-xs text-gray-500 mb-1">あなた</div>
+                        <div>{conversation.maleReply}</div>
+                      </div>
+                      <button
+                        onClick={() => handleCopyMessage(conversation.maleReply)}
+                        className="mt-1 text-xs text-blue-500 hover:text-blue-600 transition-colors"
+                      >
+                        コピーする
+                      </button>
                     </div>
-                  </div>
-
-                  {/* タイムスタンプ */}
-                  <div className="text-xs text-gray-400 text-center">
-                    {new Date(conversation.createdAt).toLocaleString('ja-JP')}
                   </div>
                 </div>
               ))}
@@ -242,40 +265,76 @@ export default function Chat() {
         {showCandidates && replyCandidates.length > 0 && (
           <div className="bg-white border-t border-gray-200 p-4">
             <h3 className="text-sm font-medium text-gray-700 mb-3">
-              返信候補（クリックして確定、編集ボタンで編集）
+              返信候補（クリックして編集）
             </h3>
             <div className="space-y-3">
               {replyCandidates.map((candidate) => (
                 <div
                   key={candidate.id}
-                  className="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+                  className={`relative p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer ${candidate.isEditing
+                    ? 'border-green-500 bg-gradient-to-br from-green-50 to-green-100'
+                    : 'border-gray-200 bg-gradient-to-br from-white to-gray-50 hover:border-blue-500 hover:-translate-y-1 hover:shadow-lg'
+                    }`}
+                  style={{
+                    boxShadow: candidate.isEditing
+                      ? '0 4px 12px rgba(34, 197, 94, 0.15)'
+                      : '0 2px 8px rgba(0, 0, 0, 0.05)'
+                  }}
                 >
                   {candidate.isEditing ? (
-                    <textarea
-                      value={candidate.editText}
-                      onChange={(e) => handleEditCandidate(candidate.id, e.target.value)}
-                      onBlur={() => handleToggleEdit(candidate.id)}
-                      className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      rows={3}
-                      autoFocus
-                    />
-                  ) : (
-                    <div>
-                      <p className="text-gray-800 mb-2">{candidate.editText || candidate.text}</p>
-                      <div className="flex space-x-2">
+                    <div className="pr-20">
+                      <textarea
+                        value={candidate.editText}
+                        onChange={(e) => handleEditCandidate(candidate.id, e.target.value)}
+                        className="w-full border-0 outline-none resize-none bg-transparent text-gray-800"
+                        rows={3}
+                        autoFocus
+                        style={{ minHeight: '60px' }}
+                      />
+                      <div className="mt-2 space-x-2">
                         <button
                           onClick={() => handleToggleEdit(candidate.id)}
-                          className="text-sm text-blue-500 hover:text-blue-600"
+                          className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs transition-colors"
                         >
-                          編集
+                          <i className="fas fa-check mr-1"></i>保存
                         </button>
                         <button
-                          onClick={() => handleSelectCandidate(candidate)}
-                          className="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                          onClick={() => {
+                            // 編集をキャンセルして元のテキストに戻す
+                            setReplyCandidates(prev =>
+                              prev.map(c =>
+                                c.id === candidate.id
+                                  ? { ...c, isEditing: false, editText: c.text }
+                                  : c
+                              )
+                            );
+                          }}
+                          className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs transition-colors"
                         >
-                          この返信を確定
+                          <i className="fas fa-times mr-1"></i>キャンセル
                         </button>
                       </div>
+                    </div>
+                  ) : (
+                    <div className="pr-20">
+                      <div
+                        className="text-gray-800 cursor-pointer"
+                        onClick={() => handleToggleEdit(candidate.id)}
+                      >
+                        {candidate.editText || candidate.text}
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSelectCandidate(candidate);
+                        }}
+                        className="absolute top-3 right-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-1 rounded text-sm transition-all duration-200 transform hover:scale-105"
+                        style={{
+                          boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+                        }}
+                      >
+                        <i className="fas fa-check mr-1"></i>確定
+                      </button>
                     </div>
                   )}
                 </div>
@@ -301,7 +360,7 @@ export default function Chat() {
               disabled={isLoading || !message.trim() || !selectedTarget}
               className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? '生成中...' : '返信候補を生成'}
+              {isLoading ? '生成中...' : '送信'}
             </button>
           </div>
         </div>
