@@ -1,5 +1,5 @@
 import { prisma } from './prisma';
-import { CreateUserData, DatabaseUser } from '@/types/auth';
+import { CreateUserData, DatabaseUser, Auth0SessionUser } from '@/types/auth';
 
 /**
  * ユーザーをメールアドレスで検索
@@ -62,7 +62,7 @@ export async function updateUser(id: number, userData: Partial<CreateUserData>):
  * Auth0ユーザーをデータベースと同期
  * 存在しない場合は作成、存在する場合は更新
  */
-export async function syncAuth0User(auth0User: any): Promise<DatabaseUser | null> {
+export async function syncAuth0User(auth0User: Auth0SessionUser): Promise<DatabaseUser | null> {
   if (!auth0User.email) return null;
 
   try {

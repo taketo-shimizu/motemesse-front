@@ -1,24 +1,14 @@
-import { User } from '@auth0/nextjs-auth0/client';
 import { User as PrismaUser } from '@prisma/client';
 
-export interface Auth0User extends User {
+export interface Auth0SessionUser {
+  nickname?: string;
   name?: string;
-  email?: string;
   picture?: string;
   updated_at?: string;
+  email?: string;
   email_verified?: boolean;
   sub?: string;
-}
-
-export interface ProtectedRouteProps {
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
-}
-
-export interface AuthState {
-  user: Auth0User | null;
-  isLoading: boolean;
-  error: Error | null;
+  sid?: string;
 }
 
 // Database User type (from Prisma)
@@ -26,8 +16,8 @@ export type DatabaseUser = PrismaUser;
 
 export interface CreateUserData {
   email: string;
-  name?: string;
-  auth0Id?: string;
-  picture?: string;
+  name?: string | null;
+  auth0Id?: string | null;
+  picture?: string | null;
   emailVerified?: boolean;
 }

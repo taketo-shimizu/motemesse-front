@@ -6,13 +6,8 @@ import { useTargetsStore } from '@/store/targets';
 import { FiSettings, FiPlus, FiTrash2 } from 'react-icons/fi';
 
 export default function Header() {
-  const [mounted, setMounted] = useState(false);
   const { openMenu } = useSideMenuStore();
   const { targets, selectedTargetId, selectTarget, fetchTargets } = useTargetsStore();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const handleAddClick = async () => {
     const name = prompt('女性の名前を入力してください');
@@ -97,12 +92,12 @@ export default function Header() {
       <div className="flex items-center space-x-3 mt-4 sm:mt-0">
         <select
           id="womanSelect"
-          value={mounted ? (selectedTargetId?.toString() || '') : ''}
+          value={selectedTargetId?.toString() || ''}
           onChange={handleSelectChange}
           className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">女性を選択...</option>
-          {mounted && targets.map((target) => (
+          {targets.map((target) => (
             <option key={target.id} value={target.id.toString()}>
               {target.name}
             </option>

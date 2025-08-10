@@ -3,8 +3,9 @@
 import DefaultLayout from '@/components/layout/DefaultLayout';
 import { FiSave } from 'react-icons/fi';
 import { useTargetsStore } from '@/store/targets';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useUserStore } from '@/store/user';
+import { useSettingStore } from '@/store/setting';
 
 export default function Setting() {
 
@@ -14,47 +15,18 @@ export default function Setting() {
     // 選択された女性のデータを取得
     const selectedTarget = targets.find(t => t.id === selectedTargetId);
 
-    // フォームの状態管理（男性用）
-    const [maleFormData, setMaleFormData] = useState({
-        age: '',
-        job: '',
-        hobby: '',
-        residence: '',
-        workplace: '',
-        bloodType: '',
-        education: '',
-        workType: '',
-        holiday: '',
-        marriageHistory: '',
-        hasChildren: '',
-        smoking: '',
-        drinking: '',
-        livingWith: '',
-        marriageIntention: '',
-        selfIntroduction: ''
-    });
-
-    // フォームの状態管理（女性用）
-    const [femaleFormData, setFemaleFormData] = useState({
-        age: '',
-        job: '',
-        hobby: '',
-        residence: '',
-        workplace: '',
-        bloodType: '',
-        education: '',
-        workType: '',
-        holiday: '',
-        marriageHistory: '',
-        hasChildren: '',
-        smoking: '',
-        drinking: '',
-        livingWith: '',
-        marriageIntention: '',
-        selfIntroduction: ''
-    });
-
-    const [isSaving, setIsSaving] = useState(false);
+    // Zustandストアから状態を取得
+    const {
+        maleFormData,
+        femaleFormData,
+        isSaving,
+        setMaleFormData,
+        setFemaleFormData,
+        setIsSaving,
+        updateMaleField,
+        updateFemaleField,
+        resetFemaleForm
+    } = useSettingStore();
 
     // ユーザー（男性）のデータが変更されたら、フォームを更新
     useEffect(() => {
@@ -103,41 +75,18 @@ export default function Setting() {
             });
         } else {
             // 選択されていない場合はフォームをクリア
-            setFemaleFormData({
-                age: '',
-                job: '',
-                hobby: '',
-                residence: '',
-                workplace: '',
-                bloodType: '',
-                education: '',
-                workType: '',
-                holiday: '',
-                marriageHistory: '',
-                hasChildren: '',
-                smoking: '',
-                drinking: '',
-                livingWith: '',
-                marriageIntention: '',
-                selfIntroduction: ''
-            });
+            resetFemaleForm();
         }
     }, [selectedTarget]);
 
     // フォーム入力の処理（男性用）
     const handleMaleInputChange = (field: string, value: string) => {
-        setMaleFormData(prev => ({
-            ...prev,
-            [field]: value
-        }));
+        updateMaleField(field, value);
     };
 
     // フォーム入力の処理（女性用）
     const handleFemaleInputChange = (field: string, value: string) => {
-        setFemaleFormData(prev => ({
-            ...prev,
-            [field]: value
-        }));
+        updateFemaleField(field, value);
     };
 
     // 保存処理
@@ -221,8 +170,8 @@ export default function Setting() {
     return (
         <DefaultLayout>
             <div id="profileScreen" className="flex-1 bg-gray-50 overflow-y-auto">
-                <div className="max-w-6xl mx-auto p-6">
-                    <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="w-full p-3">
+                    <div className="bg-white rounded-lg shadow-sm p-3">
                         <h2 className="mb-6 text-2xl font-semibold text-gray-800">プロフィール設定</h2>
 
                         <div className="grid md:grid-cols-2 gap-8">
@@ -465,7 +414,7 @@ export default function Setting() {
 
                                 {!selectedTarget && (
                                     <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                                        <p className="text-yellow-800">女性を選択してから設定を行ってください。</p>
+                                        <p className="text-yellow-800">女性を選択してください。</p>
                                     </div>
                                 )}
 

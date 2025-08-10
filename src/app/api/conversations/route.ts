@@ -64,9 +64,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { targetId, femaleMessage, maleReply } = body;
 
-    if (!targetId || !femaleMessage || !maleReply) {
+    if (!targetId || !maleReply) {
       return NextResponse.json({
-        error: 'targetId, femaleMessage, and maleReply are required'
+        error: 'targetId and maleReply are required'
       }, { status: 400 });
     }
 
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
       data: {
         userId: user.id,
         targetId: parseInt(targetId),
-        femaleMessage,
+        femaleMessage: femaleMessage ?? '',
         maleReply
       },
       include: {
