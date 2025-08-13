@@ -224,9 +224,6 @@ export default function Chat() {
           <h2 className="text-lg font-semibold text-gray-800">
             {selectedTarget ? `${selectedTarget.name}さんとの会話` : 'チャット'}
           </h2>
-          {!selectedTarget && (
-            <p className="text-sm text-gray-500 mt-1">女性を選択してからチャットを開始してください</p>
-          )}
         </div>
 
         {/* 会話履歴エリア */}
