@@ -162,7 +162,7 @@ export async function PUT(request: Request) {
 
     const body = await request.json();
     const {
-      id, age, job, hobby, selfIntroduction,
+      id, name,age, job, hobby, selfIntroduction,
       residence, workplace, bloodType, education, workType, holiday,
       marriageHistory, hasChildren, smoking, drinking, livingWith, marriageIntention
     } = body;
@@ -203,6 +203,7 @@ export async function PUT(request: Request) {
     const updatedTarget = await prisma.target.update({
       where: { id: targetId },
       data: {
+        name: name || null,
         age: age ? parseInt(age, 10) : null,
         job: job || null,
         hobby: hobby || null,

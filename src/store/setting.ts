@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 interface ProfileFormData {
+  name: string;
   age: string;
   job: string;
   hobby: string;
@@ -35,6 +36,7 @@ interface SettingState {
 }
 
 const initialFormData: ProfileFormData = {
+  name: '',
   age: '',
   job: '',
   hobby: '',

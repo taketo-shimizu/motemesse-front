@@ -32,6 +32,7 @@ export default function Setting() {
     useEffect(() => {
         if (user) {
             setMaleFormData({
+                name: user.name || '',
                 age: user.age?.toString() || '',
                 job: user.job || '',
                 hobby: user.hobby || '',
@@ -56,6 +57,7 @@ export default function Setting() {
     useEffect(() => {
         if (selectedTarget) {
             setFemaleFormData({
+                name: selectedTarget.name || '',
                 age: selectedTarget.age?.toString() || '',
                 job: selectedTarget.job || '',
                 hobby: selectedTarget.hobby || '',
@@ -99,6 +101,7 @@ export default function Setting() {
             if (user) {
                 promises.push(
                     updateUser({
+                        name: maleFormData.name,
                         age: maleFormData.age,
                         job: maleFormData.job,
                         hobby: maleFormData.hobby,
@@ -129,6 +132,7 @@ export default function Setting() {
                         },
                         body: JSON.stringify({
                             id: selectedTarget.id,
+                            name: femaleFormData.name,
                             age: femaleFormData.age,
                             job: femaleFormData.job,
                             hobby: femaleFormData.hobby,
@@ -178,6 +182,18 @@ export default function Setting() {
                             {/* 男性側（自分）の情報 */}
                             <div className="space-y-4">
                                 <h3 className="text-lg font-medium text-gray-800 border-b pb-2">あなた（男性）の情報</h3>
+
+                                {/* 名前 */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">お名前</label>
+                                    <input
+                                        type="text"
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="例: 田中太郎"
+                                        value={maleFormData.name}
+                                        onChange={(e) => handleMaleInputChange('name', e.target.value)}
+                                    />
+                                </div>
 
                                 {/* 基本情報 */}
                                 <div className="grid grid-cols-2 gap-4">
@@ -417,6 +433,19 @@ export default function Setting() {
                                         <p className="text-yellow-800">女性を選択してください。</p>
                                     </div>
                                 )}
+
+                                {/* 名前 */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">お名前</label>
+                                    <input
+                                        type="text"
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="例: 田中花子"
+                                        value={femaleFormData.name}
+                                        onChange={(e) => handleFemaleInputChange('name', e.target.value)}
+                                        disabled={!selectedTarget}
+                                    />
+                                </div>
 
                                 {/* 基本情報 */}
                                 <div className="grid grid-cols-2 gap-4">

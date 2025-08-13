@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const {
-      age, job, hobby, selfIntroduction,
+      name,age, job, hobby, selfIntroduction,
       residence, workplace, bloodType, education, workType, holiday,
       marriageHistory, hasChildren, smoking, drinking, livingWith, marriageIntention
     } = body;
@@ -38,6 +38,7 @@ export async function POST(request: Request) {
     const updatedUser = await prisma.user.update({
       where: { id: user.id },
       data: {
+        name: name || null,
         age: age ? parseInt(age, 10) : null,
         job: job || null,
         hobby: hobby || null,
