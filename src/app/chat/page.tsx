@@ -128,7 +128,7 @@ export default function Chat() {
           userId: user.id,
           selectedTargetId,
           // デフォルトのトーンスタイル
-          type: '軽いノリの敬語'
+          //type: '軽いノリの敬語'
         })
       });
       if (!response.ok) {

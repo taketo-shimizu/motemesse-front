@@ -34,6 +34,7 @@ interface UserState {
   error: string | null;
   syncUser: () => Promise<void>;
   updateUser: (data: {
+    name?: string;
     age?: string;
     job?: string;
     hobby?: string;

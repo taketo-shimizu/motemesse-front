@@ -79,7 +79,6 @@ export async function syncAuth0User(auth0User: Auth0SessionUser): Promise<Databa
 
     const userData: CreateUserData = {
       email: auth0User.email,
-      name: auth0User.name || null,
       auth0Id: auth0User.sub || null,
       picture: auth0User.picture || null,
       emailVerified: auth0User.email_verified || false
@@ -88,7 +87,6 @@ export async function syncAuth0User(auth0User: Auth0SessionUser): Promise<Databa
     if (dbUser) {
       // 既存ユーザーを更新（メールアドレスが変更された場合も考慮）
       const updateData: Partial<CreateUserData> = {
-        name: userData.name,
         picture: userData.picture,
         emailVerified: userData.emailVerified
       };
