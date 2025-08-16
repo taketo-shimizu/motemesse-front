@@ -2,8 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useSideMenuStore } from '@/store/sideMenu';
-import { FiX, FiUser, FiTrash2, FiLogOut } from 'react-icons/fi';
-import { CiChat1 } from 'react-icons/ci';
+import { FiX,FiLogOut,FiUser } from 'react-icons/fi';
 import { MdChatBubbleOutline } from 'react-icons/md';
 import { useUserStore } from '@/store/user';
 
@@ -16,8 +15,13 @@ export default function SideMenu() {
     window.location.href = '/api/auth/logout';
   };
 
-  const handleProfileSettings = () => {
-    router.push('/setting');
+  const handleProfileUserSettings = () => {
+    router.push('/user-setting');
+    closeMenu();
+  };
+
+  const handleProfileFemaleSettings = () => {
+    router.push('/female-setting');
     closeMenu();
   };
 
@@ -71,23 +75,32 @@ export default function SideMenu() {
           onClick={handleChatHistory}
           className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 px-4 rounded-lg transition-colors flex items-center"
         >
-          <MdChatBubbleOutline className="w-4 h-4 mr-2" />
+          <MdChatBubbleOutline className="w-5 h-5 mr-2" />
           チャット履歴
         </button>
 
         <button
           id="profileSettingsBtn"
-          onClick={handleProfileSettings}
+          onClick={handleProfileUserSettings}
           className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 px-4 rounded-lg transition-colors flex items-center"
         >
-          <FiUser className="w-4 h-4 mr-2" />
-          プロフィール設定
+          <FiUser className="w-5 h-5 mr-2 text-blue-600" />
+          プロフィール設定（あなた）
         </button>
 
-        <button id="clearHistoryBtn" className="w-full bg-red-100 hover:bg-red-200 text-red-700 py-3 px-4 rounded-lg transition-colors flex items-center">
+        <button
+          id="profileSettingsBtn"
+          onClick={handleProfileFemaleSettings}
+          className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 px-4 rounded-lg transition-colors flex items-center"
+        >
+          <FiUser className="w-5 h-5 mr-2 text-pink-600" />
+          プロフィール設定（女性）
+        </button>
+
+        {/*<button id="clearHistoryBtn" className="w-full bg-red-100 hover:bg-red-200 text-red-700 py-3 px-4 rounded-lg transition-colors flex items-center">
           <FiTrash2 className="w-4 h-4 mr-2" />
           履歴を削除
-        </button>
+        </button>*/}
 
         <button
           onClick={handleLogout}
