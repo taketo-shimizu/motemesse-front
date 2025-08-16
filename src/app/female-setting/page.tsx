@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import { useSettingStore } from '@/store/setting';
 
 export default function FemaleSetting() {
-    const { targets, selectedTargetId, fetchTargets } = useTargetsStore();
+    const { targets, selectedTargetId, fetchTargets, isLoading } = useTargetsStore();
     
     // 選択された女性のデータを取得
     const selectedTarget = targets.find(t => t.id === selectedTargetId);
@@ -107,13 +107,20 @@ export default function FemaleSetting() {
 
     return (
         <DefaultLayout>
-            <div id="profileScreen" className="flex-1 bg-gray-50 overflow-y-auto">
+            <div id="profileScreen" className="flex-1 bg-gray-50 overflow-y-auto relative">
+                {isSaving || isLoading && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-blue-500"></div>
+                    </div>
+                )}
+                
                 <div className="w-full p-3">
                     <div className="bg-white rounded-lg shadow-sm p-3">
                         <h2 className="mb-6 text-2xl font-semibold text-gray-800">
-                            相手（女性）のプロフィール設定
-                            {selectedTarget && (
-                                <span className="text-lg text-gray-500 ml-2">- {selectedTarget.name}さん</span>
+                            {selectedTarget ? (
+                                <p>{selectedTarget.name}さんのプロフィール設定</p>
+                            ) : (
+                                <p>相手（女性）のプロフィール設定</p>
                             )}
                         </h2>
 

@@ -7,7 +7,7 @@ import { FiSettings, FiPlus, FiTrash2 } from 'react-icons/fi';
 
 export default function Header() {
   const { openMenu } = useSideMenuStore();
-  const { targets, selectedTargetId, selectTarget, fetchTargets } = useTargetsStore();
+  const { targets, selectedTargetId, selectTarget, fetchTargets, handleSelectChange } = useTargetsStore();
 
   const handleAddClick = async () => {
     const name = prompt('女性の名前を入力してください');
@@ -26,10 +26,10 @@ export default function Header() {
       if (!response.ok) {
         throw new Error('Failed to add target');
       }
-
-      alert('追加しました');
       // targetsリストを更新
       await fetchTargets();
+
+      alert(`${name.trim()}さんを追加しました`);
     } catch (error) {
       console.error('Error adding target:', error);
       alert('追加に失敗しました');
@@ -41,10 +41,7 @@ export default function Header() {
       alert('削除する女性を選択してください');
       return;
     }
-    console.log(targets, 'targets')
-    console.log(selectedTargetId, 'selectedTargetId')
     const selectedTarget = targets.find(t => t.id === selectedTargetId);
-    console.log(selectedTarget);
     if (!selectedTarget) return;
 
     if (!confirm(`${selectedTarget.name}さんを削除してもよろしいですか？`)) {
@@ -60,20 +57,13 @@ export default function Header() {
         throw new Error('Failed to delete target');
       }
 
-      alert('削除しました');
       selectTarget(null); // 選択を解除
       await fetchTargets(); // リストを更新
+      alert(`${selectedTarget.name}さんを削除しました`);
     } catch (error) {
       console.error('Error deleting target:', error);
       alert('削除に失敗しました');
     }
-  };
-
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const targetIdString = e.target.value;
-    const targetId = targetIdString ? parseInt(targetIdString, 10) : null;
-    console.log(targetId);
-    selectTarget(targetId);
   };
 
   return (
