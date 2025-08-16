@@ -84,7 +84,13 @@ export default function MaleSetting() {
 
     return (
         <DefaultLayout>
-            <div id="profileScreen" className="flex-1 bg-gray-50 overflow-y-auto">
+            <div id="profileScreen" className="flex-1 bg-gray-50 overflow-y-auto relative">
+                {isSaving && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-blue-500"></div>
+                    </div>
+                )}
+                
                 <div className="w-full p-3">
                     <div className="bg-white rounded-lg shadow-sm p-3">
                         <h2 className="mb-6 text-2xl font-semibold text-gray-800">あなたのプロフィール設定</h2>

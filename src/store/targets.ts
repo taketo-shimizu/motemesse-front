@@ -33,6 +33,7 @@ interface TargetsState {
   fetchTargets: () => Promise<void>;
   addTarget: (target: Target) => void;
   selectTarget: (targetId: number | null) => void;
+  handleSelectChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
 export const useTargetsStore = create<TargetsState>((set) => ({
@@ -61,5 +62,13 @@ export const useTargetsStore = create<TargetsState>((set) => ({
 
   selectTarget: (targetId) => {
     set({ selectedTargetId: targetId });
+  },
+
+  handleSelectChange: (e: React.ChangeEvent<HTMLSelectElement>) => {
+    set({ isLoading: true });
+    const targetIdString = e.target.value;
+    const targetId = targetIdString ? parseInt(targetIdString, 10) : null;
+    set({ selectedTargetId: targetId });
+    set({ isLoading: false });
   },
 }));
