@@ -8,8 +8,8 @@ import { useChatStore } from '@/store/chat';
 
 
 export default function Chat() {
-  const { targets, selectedTargetId, selectTarget, fetchTargets } = useTargetsStore();
-  const { user } = useUserStore();
+  const { targets, selectedTargetId, selectTarget, fetchTargets, isLoading: isLoadingTargets } = useTargetsStore();
+  const { user, isLoading: isLoadingUser } = useUserStore();
   const {
     message,
     replyCandidates,
@@ -214,11 +214,15 @@ export default function Chat() {
     }
   };
 
-  console.log(conversations)
-
   return (
     <DefaultLayout>
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full relative">
+        {(isLoading || isLoadingConversations ||isLoadingUser || isLoadingTargets) && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-500"></div>
+          </div>
+        )}
+        
         {/* ヘッダー */}
         <div className="bg-white border-b border-gray-200 p-4">
           <h2 className="text-lg font-semibold text-gray-800">
