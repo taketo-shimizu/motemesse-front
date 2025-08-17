@@ -31,7 +31,6 @@ interface TargetsState {
   isLoading: boolean;
   error: string | null;
   fetchTargets: () => Promise<void>;
-  addTarget: (target: Target) => void;
   selectTarget: (targetId: number | null) => void;
   handleSelectChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
@@ -54,10 +53,6 @@ export const useTargetsStore = create<TargetsState>((set) => ({
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
     }
-  },
-
-  addTarget: (target) => {
-    set((state) => ({ targets: [...state.targets, target] }));
   },
 
   selectTarget: (targetId) => {

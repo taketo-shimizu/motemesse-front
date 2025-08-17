@@ -5,9 +5,11 @@ import { FiSave } from 'react-icons/fi';
 import { useEffect } from 'react';
 import { useUserStore } from '@/store/user';
 import { useSettingStore } from '@/store/setting';
+import { useTargetsStore } from '@/store/targets';
 
 export default function MaleSetting() {
-    const { user, updateUser } = useUserStore();
+    const { user, updateUser, isLoading: isLoadingUser } = useUserStore();
+    const { isLoading: isLoadingTargets } = useTargetsStore();
     
     // Zustandストアから状態を取得
     const {
@@ -85,9 +87,9 @@ export default function MaleSetting() {
     return (
         <DefaultLayout>
             <div id="profileScreen" className="flex-1 bg-gray-50 overflow-y-auto relative">
-                {isSaving && (
+                {(isSaving || isLoadingUser || isLoadingTargets) && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-blue-500"></div>
+                        <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-500"></div>
                     </div>
                 )}
                 
