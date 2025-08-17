@@ -5,9 +5,11 @@ import { FiSave } from 'react-icons/fi';
 import { useTargetsStore } from '@/store/targets';
 import { useEffect } from 'react';
 import { useSettingStore } from '@/store/setting';
+import { useUserStore } from '@/store/user';
 
 export default function FemaleSetting() {
-    const { targets, selectedTargetId, fetchTargets, isLoading } = useTargetsStore();
+    const { targets, selectedTargetId, fetchTargets, isLoading: isLoadingTargets } = useTargetsStore();
+    const { isLoading: isLoadingUser } = useUserStore();
     
     // 選択された女性のデータを取得
     const selectedTarget = targets.find(t => t.id === selectedTargetId);
@@ -108,9 +110,9 @@ export default function FemaleSetting() {
     return (
         <DefaultLayout>
             <div id="profileScreen" className="flex-1 bg-gray-50 overflow-y-auto relative">
-                {isSaving || isLoading && (
+                {(isSaving || isLoadingUser || isLoadingTargets) && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-blue-500"></div>
+                        <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-500"></div>
                     </div>
                 )}
                 
