@@ -235,7 +235,7 @@ export default function Chat() {
         </div>
 
         {/* 会話履歴エリア */}
-        <div id="chatArea" className="flex-1 overflow-y-auto p-3 space-y-4 bg-gray-50">
+        <div id="chatArea" className="flex-1 overflow-y-auto p-3 space-y-4 bg-gray-50 pb-[90px]">
           {!selectedTarget ? (
             <div className="text-center text-gray-500 text-sm">
               女性を選択してからチャットを開始してください
