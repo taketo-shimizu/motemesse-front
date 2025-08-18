@@ -220,7 +220,7 @@ export default function Chat() {
 
   return (
     <DefaultLayout>
-      <div className="flex flex-col h-full relative">
+      <div className="grid grid-rows-[auto_1fr_auto] h-full relative">
         {(isLoading || isLoadingConversations || isGeneratingInitial ||isLoadingUser || isLoadingTargets) && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
             <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-500"></div>
@@ -235,7 +235,7 @@ export default function Chat() {
         </div>
 
         {/* 会話履歴エリア */}
-        <div id="chatArea" className="flex-1 overflow-y-auto p-3 space-y-4 bg-gray-50 pb-[90px]">
+        <div id="chatArea" className="overflow-y-auto p-3 space-y-4 bg-gray-50">
           {!selectedTarget ? (
             <div className="text-center text-gray-500 text-sm">
               女性を選択してからチャットを開始してください
@@ -376,7 +376,7 @@ export default function Chat() {
         )}
 
         {/* メッセージ入力エリア */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-10">
+        <div className="bg-white border-t border-gray-200 p-4">
           <div className="flex space-x-3">
             <input
               type="text"
