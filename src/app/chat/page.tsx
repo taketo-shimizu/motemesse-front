@@ -167,6 +167,8 @@ export default function Chat() {
   const handleSelectCandidate = async (candidate: typeof replyCandidates[0]) => {
     if (candidate.isEditing) return;
 
+    setIsLoading(true);
+
     try {
       const response = await fetch('/api/conversations', {
         method: 'POST',
@@ -194,6 +196,8 @@ export default function Chat() {
     } catch (error) {
       console.error('会話の保存中にエラーが発生しました:', error);
       setError('会話の保存中にエラーが発生しました');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -217,7 +221,7 @@ export default function Chat() {
   return (
     <DefaultLayout>
       <div className="flex flex-col h-full relative">
-        {(isLoading || isLoadingConversations ||isLoadingUser || isLoadingTargets) && (
+        {(isLoading || isLoadingConversations || isGeneratingInitial ||isLoadingUser || isLoadingTargets) && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
             <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-500"></div>
           </div>
