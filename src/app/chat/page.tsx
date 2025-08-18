@@ -376,7 +376,7 @@ export default function Chat() {
         )}
 
         {/* メッセージ入力エリア */}
-        <div className="bg-white border-t border-gray-200 p-4">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-10">
           <div className="flex space-x-3">
             <input
               type="text"
