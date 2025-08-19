@@ -221,12 +221,12 @@ export default function Chat() {
   return (
     <DefaultLayout>
       <div className="grid grid-rows-[auto_1fr_auto] h-[calc(100dvh-100px)] relative">
-        {(isLoading || isLoadingConversations || isGeneratingInitial ||isLoadingUser || isLoadingTargets) && (
+        {(isLoading || isLoadingConversations || isGeneratingInitial || isLoadingUser || isLoadingTargets) && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
             <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-500"></div>
           </div>
         )}
-        
+
         {/* ヘッダー */}
         <div className="bg-white border-b border-gray-200 p-4">
           <h2 className="text-lg font-semibold text-gray-800">
@@ -296,9 +296,31 @@ export default function Chat() {
           )}
         </div>
 
-        {/* 返信候補表示エリア */}
+        {/* メッセージ入力エリア */}
+        <div className="bg-white border-t border-gray-200 p-4">
+          <div className="flex space-x-3">
+            <input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              placeholder={selectedTarget ? "女性からのメッセージを入力" : "女性を選択してください"}
+              className="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isLoading || !selectedTarget}
+            />
+            <button
+              onClick={handleSendMessage}
+              disabled={isLoading || !message.trim() || !selectedTarget}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? '生成中..' : '送信'}
+            </button>
+          </div>
+        </div>
+
+        {/* 返信候補オーバーレイ */}
         {showCandidates && replyCandidates.length > 0 && (
-          <div className="bg-white border-t border-gray-200 p-4 overflow-y-auto">
+          <div className="absolute bottom-20 left-0 right-0 bg-white border-t border-gray-200 shadow-lg max-h-80 overflow-y-auto z-10 p-4">
             <h3 className="text-sm font-medium text-gray-700 mb-3">
               返信候補（クリックして編集）
             </h3>
@@ -374,28 +396,6 @@ export default function Chat() {
             </div>
           </div>
         )}
-
-        {/* メッセージ入力エリア */}
-        <div className="bg-white border-t border-gray-200 p-4">
-          <div className="flex space-x-3">
-            <input
-              type="text"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder={selectedTarget ? "女性からのメッセージを入力" : "女性を選択してください"}
-              className="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isLoading || !selectedTarget}
-            />
-            <button
-              onClick={handleSendMessage}
-              disabled={isLoading || !message.trim() || !selectedTarget}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? '生成中..' : '送信'}
-            </button>
-          </div>
-        </div>
       </div>
     </DefaultLayout>
   );
