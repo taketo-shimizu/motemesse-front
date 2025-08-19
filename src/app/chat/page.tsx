@@ -298,7 +298,7 @@ export default function Chat() {
 
         {/* 返信候補表示エリア */}
         {showCandidates && replyCandidates.length > 0 && (
-          <div className="bg-white border-t border-gray-200 p-4">
+          <div className="bg-white border-t border-gray-200 p-4 overflow-y-auto">
             <h3 className="text-sm font-medium text-gray-700 mb-3">
               返信候補（クリックして編集）
             </h3>
