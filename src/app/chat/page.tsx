@@ -220,7 +220,7 @@ export default function Chat() {
 
   return (
     <DefaultLayout>
-      <div className="grid grid-rows-[auto_1fr_auto] h-full relative">
+      <div className="grid grid-rows-[auto_1fr_auto] h-[calc(100dvh-100px)] relative">
         {(isLoading || isLoadingConversations || isGeneratingInitial ||isLoadingUser || isLoadingTargets) && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
             <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-500"></div>
