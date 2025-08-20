@@ -10,16 +10,12 @@ type Props = {
 
 export default function DefaultLayout({ children }: Props) {
   return (
-    <div className="bg-gray-50 flex flex-col">
+    <div className="bg-gray-50">
       <Header />
-      
-      <div className="flex flex-1 overflow-hidden">
-        <SideMenu />
-
-        <main className="flex-1 flex flex-col">
-          {children}
-        </main>
-      </div>
+      <SideMenu />
+      <main>
+        {children}
+      </main>
     </div>
   );
 }
