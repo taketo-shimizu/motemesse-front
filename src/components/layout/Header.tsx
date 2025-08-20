@@ -67,7 +67,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 px-4 py-3 sm:flex sm:items-center sm:justify-between h-[100px]">
+    <header className="bg-white shadow-sm border-b border-gray-200 px-4 py-3 sm:flex sm:items-center sm:justify-between max-h-[100px]">
       <div className="flex items-center space-x-4">
         <button
           id="settingsBtn"
