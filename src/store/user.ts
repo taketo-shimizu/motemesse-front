@@ -24,6 +24,7 @@ interface User {
   personality?: string | null;
   selfIntroduction?: string | null;
   tone: number;
+  recentTargetId?: number | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -54,6 +55,7 @@ interface UserState {
     selfIntroduction?: string;
   }) => Promise<void>;
   updateTone: (tone: number) => Promise<void>;
+  updateRecentTargetId: (targetId: number | null) => Promise<void>;
   setUser: (user: User | null) => void;
 }
 
@@ -134,6 +136,43 @@ export const useUserStore = create<UserState>((set) => ({
       // エラー時は元の値に戻す
       set({
         user: { ...user, tone: previousTone },
+        error: (error as Error).message
+      });
+    }
+  },
+
+  updateRecentTargetId: async (targetId: number | null) => {
+    const { user } = useUserStore.getState();
+    if (!user) return;
+
+    // 楽観的更新: 即座にUIを更新
+    const previousRecentTargetId = user.recentTargetId;
+    set({
+      user: { ...user, recentTargetId: targetId },
+      error: null
+    });
+
+    try {
+      const response = await fetch('/api/users/recent-target', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ recentTargetId: targetId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`Failed to update recent target: ${response.status} ${errorData}`);
+      }
+
+      // サーバーからの正式な更新データで同期
+      const updatedUser = await response.json();
+      set({ user: updatedUser });
+    } catch (error) {
+      // エラー時は元の値に戻す
+      set({
+        user: { ...user, recentTargetId: previousRecentTargetId },
         error: (error as Error).message
       });
     }

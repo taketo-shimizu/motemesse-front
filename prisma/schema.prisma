@@ -37,11 +37,13 @@ model User {
   marriageIntention String? @map("marriage_intention") // 結婚に対する意思
   selfIntroduction String? @map("self_introduction") // 自己紹介
   tone        Int      @default(0) // トーン設定
+  recentTargetId Int?   @map("recent_target_id") // 最近選択したターゲットのID
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   targets     Target[]
   conversations Conversation[]
+  recentTarget Target?  @relation("UserRecentTarget", fields: [recentTargetId], references: [id])
 
   @@map("users")
 }
@@ -71,6 +73,7 @@ model Target {
 
   user        User     @relation(fields: [userId], references: [id])
   conversations Conversation[]
+  usersWithRecentTarget User[] @relation("UserRecentTarget")
 
   @@map("targets")
 }
