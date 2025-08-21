@@ -86,7 +86,7 @@ export default function MaleSetting() {
 
     return (
         <DefaultLayout>
-            <div id="profileScreen" className="w-full p-3 bg-gray-50 overflow-y-auto relative h-[calc(100dvh-100px)] overflow-y-auto">
+            <div id="profileScreen" className="w-full p-3 bg-gray-50 overflow-y-auto relative h-[calc(100dvh-100px)] sm:h-[calc(100dvh-70px)] overflow-y-auto">
                 {(isSaving || isLoadingUser || isLoadingTargets) && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
                         <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-500"></div>

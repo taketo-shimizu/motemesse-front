@@ -2,13 +2,13 @@
 
 import DefaultLayout from '@/components/layout/DefaultLayout';
 import { useTargetsStore } from '@/store/targets';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useUserStore } from '@/store/user';
 import { useChatStore } from '@/store/chat';
 
 
 export default function Chat() {
-  const { targets, selectedTargetId, selectTarget, fetchTargets, isLoading: isLoadingTargets } = useTargetsStore();
+  const { targets, selectedTargetId, isLoading: isLoadingTargets } = useTargetsStore();
   const { user, isLoading: isLoadingUser } = useUserStore();
   const {
     message,
@@ -36,8 +36,19 @@ export default function Chat() {
   // 選択されたターゲットの情報を取得
   const selectedTarget = targets.find(t => t.id === selectedTargetId);
 
+  // 会話履歴エリアを最下部にスクロールする関数
+  const scrollToBottom = () => {
+    const chatArea = document.getElementById('chatArea');
+    if (chatArea) {
+      // 少し遅延を入れてDOMの更新を待つ
+      setTimeout(() => {
+        chatArea.scrollTop = chatArea.scrollHeight;
+      }, 100);
+    }
+  };
+
   // 会話履歴を取得
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async () => {
     if (!selectedTargetId) return;
 
     setIsLoadingConversations(true);
@@ -46,13 +57,15 @@ export default function Chat() {
       if (response.ok) {
         const data = await response.json();
         setConversations(data);
+        // 会話履歴を取得後、最下部にスクロール
+        scrollToBottom();
       }
     } catch (error) {
       console.error('会話履歴の取得に失敗しました:', error);
     } finally {
       setIsLoadingConversations(false);
     }
-  };
+  }, [selectedTargetId, setIsLoadingConversations, setConversations]);
 
   // ターゲットが変更されたら会話履歴を取得
   useEffect(() => {
@@ -60,7 +73,7 @@ export default function Chat() {
       fetchConversations();
       resetChatState();
     }
-  }, [selectedTargetId]);
+  }, [selectedTargetId, fetchConversations, resetChatState]);
 
   // 返信候補を生成
   const handleSendMessage = async () => {
@@ -192,6 +205,9 @@ export default function Chat() {
       // 返信候補をクリア
       resetChatState();
 
+      // 会話保存後、最下部にスクロール
+      scrollToBottom();
+
       console.log('会話が保存されました');
     } catch (error) {
       console.error('会話の保存中にエラーが発生しました:', error);
@@ -220,7 +236,7 @@ export default function Chat() {
 
   return (
     <DefaultLayout>
-      <div className="grid grid-rows-[auto_1fr_auto] h-[calc(100dvh-100px)] relative">
+      <div className="grid grid-rows-[auto_1fr_auto] h-[calc(100dvh-100px)] sm:h-[calc(100dvh-70px)] relative">
         {(isLoading || isLoadingConversations || isGeneratingInitial || isLoadingUser || isLoadingTargets) && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
             <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-500"></div>
