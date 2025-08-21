@@ -1,13 +1,30 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useSideMenuStore } from '@/store/sideMenu';
 import { useTargetsStore } from '@/store/targets';
+import { useUserStore } from '@/store/user';
 import { FiSettings, FiPlus, FiTrash2 } from 'react-icons/fi';
 
 export default function Header() {
   const { openMenu } = useSideMenuStore();
   const { targets, selectedTargetId, selectTarget, fetchTargets, handleSelectChange } = useTargetsStore();
+  const { updateRecentTargetId } = useUserStore();
+
+  const handleSelectChangeWithRecentTarget = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    // 既存のhandleSelectChangeロジックを実行
+    handleSelectChange(e);
+
+    // recent_target_idを更新
+    const targetIdString = e.target.value;
+    const targetId = targetIdString ? parseInt(targetIdString, 10) : null;
+
+    try {
+      await updateRecentTargetId(targetId);
+    } catch (error) {
+      console.error('Error updating recent target:', error);
+      // エラーが発生してもUIの選択は維持される（楽観的更新のため）
+    }
+  };
 
   const handleAddClick = async () => {
     const name = prompt('女性の名前を入力してください');
@@ -76,14 +93,14 @@ export default function Header() {
         >
           <FiSettings className="w-5 h-5" />
         </button>
-        <h1 className="text-xl font-semibold text-gray-800">モテメッセ</h1>
+        <h1 className="text-lg sm:text-xl font-semibold text-gray-800">モテメッセ</h1>
       </div>
 
       <div className="flex items-center space-x-3 mt-4 sm:mt-0">
         <select
           id="womanSelect"
           value={selectedTargetId?.toString() || ''}
-          onChange={handleSelectChange}
+          onChange={handleSelectChangeWithRecentTarget}
           className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">女性を選択...</option>

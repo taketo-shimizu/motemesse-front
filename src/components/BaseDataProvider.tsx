@@ -8,6 +8,7 @@ import { useUser } from '@auth0/nextjs-auth0/client';
 export default function BaseDataProvider({ children }: { children: React.ReactNode }) {
   const { user, isLoading: userLoading } = useUser();
   const fetchTargets = useTargetsStore((state) => state.fetchTargets);
+  const setSelectedTargetFromRecentTarget = useTargetsStore((state) => state.setSelectedTargetFromRecentTarget);
   const syncUser = useUserStore((state) => state.syncUser);
 
   useEffect(() => {
@@ -17,11 +18,17 @@ export default function BaseDataProvider({ children }: { children: React.ReactNo
       Promise.all([
         syncUser(),
         fetchTargets()
-      ]).catch(error => {
+      ]).then(() => {
+        // ユーザー同期後、recent_target_idがある場合はselectedTargetIdに設定
+        const currentUser = useUserStore.getState().user;
+        if (currentUser?.recentTargetId) {
+          setSelectedTargetFromRecentTarget(currentUser.recentTargetId);
+        }
+      }).catch(error => {
         console.error('Error initializing app data:', error);
       });
     }
-  }, [user, userLoading, fetchTargets, syncUser]);
+  }, [user, userLoading, fetchTargets, syncUser, setSelectedTargetFromRecentTarget]);
 
   return <>{children}</>;
 }
