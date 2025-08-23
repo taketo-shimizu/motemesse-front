@@ -36,6 +36,10 @@ export default function Chat() {
   // 選択されたターゲットの情報を取得
   const selectedTarget = targets.find(t => t.id === selectedTargetId);
 
+  // 初期化完了の判定
+  const isInitializing = (isLoadingUser || isLoadingTargets) ||
+    (targets.length > 0 && selectedTargetId === null);
+
   // 会話履歴エリアを最下部にスクロールする関数
   const scrollToBottom = () => {
     const chatArea = document.getElementById('chatArea');
@@ -237,7 +241,7 @@ export default function Chat() {
   return (
     <DefaultLayout>
       <div className="grid grid-rows-[auto_1fr_auto] h-[calc(100dvh-100px)] sm:h-[calc(100dvh-70px)] relative">
-        {(isLoading || isLoadingConversations || isGeneratingInitial || isLoadingUser || isLoadingTargets) && (
+        {(isLoading || isLoadingConversations || isGeneratingInitial || isInitializing) && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
             <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-500"></div>
           </div>
@@ -252,7 +256,11 @@ export default function Chat() {
 
         {/* 会話履歴エリア */}
         <div id="chatArea" className="overflow-y-auto p-3 space-y-4 bg-gray-50">
-          {!selectedTarget ? (
+          {isInitializing ? (
+            <div className="text-center text-gray-500 text-sm">
+              初期化中...
+            </div>
+          ) : !selectedTarget ? (
             <div className="text-center text-gray-500 text-sm">
               女性を選択してからチャットを開始してください
             </div>
