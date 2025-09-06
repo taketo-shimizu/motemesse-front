@@ -2,10 +2,12 @@
 
 import DefaultLayout from '@/components/layout/DefaultLayout';
 import { FiSave } from 'react-icons/fi';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useUserStore } from '@/store/user';
 import { useSettingStore } from '@/store/setting';
 import { useTargetsStore } from '@/store/targets';
+import ImageUploadForProfile from '@/components/ImageUploadForProfile';
+import { ProfileData } from '@/types/profile';
 
 export default function MaleSetting() {
     const { user, updateUser, isLoading: isLoadingUser } = useUserStore();
@@ -19,6 +21,9 @@ export default function MaleSetting() {
         setIsSaving,
         updateMaleField,
     } = useSettingStore();
+
+    // 画像解析中のステート
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     // ユーザー（男性）のデータが変更されたら、フォームを更新
     useEffect(() => {
@@ -48,6 +53,27 @@ export default function MaleSetting() {
     // フォーム入力の処理
     const handleInputChange = (field: string, value: string) => {
         updateMaleField(field, value);
+    };
+
+    // 画像解析結果を受け取って自動入力
+    const handleImageAnalyzed = (profileData: ProfileData) => {
+        if (profileData.name) updateMaleField('name', profileData.name);
+        if (profileData.age) updateMaleField('age', profileData.age.toString());
+        if (profileData.job) updateMaleField('job', profileData.job);
+        if (profileData.hobby) updateMaleField('hobby', profileData.hobby);
+        if (profileData.residence) updateMaleField('residence', profileData.residence);
+        if (profileData.workplace) updateMaleField('workplace', profileData.workplace);
+        if (profileData.bloodType) updateMaleField('bloodType', profileData.bloodType);
+        if (profileData.education) updateMaleField('education', profileData.education);
+        if (profileData.workType) updateMaleField('workType', profileData.workType);
+        if (profileData.holiday) updateMaleField('holiday', profileData.holiday);
+        if (profileData.marriageHistory) updateMaleField('marriageHistory', profileData.marriageHistory);
+        if (profileData.hasChildren) updateMaleField('hasChildren', profileData.hasChildren);
+        if (profileData.smoking) updateMaleField('smoking', profileData.smoking);
+        if (profileData.drinking) updateMaleField('drinking', profileData.drinking);
+        if (profileData.livingWith) updateMaleField('livingWith', profileData.livingWith);
+        if (profileData.marriageIntention) updateMaleField('marriageIntention', profileData.marriageIntention);
+        if (profileData.selfIntroduction) updateMaleField('selfIntroduction', profileData.selfIntroduction);
     };
 
     // 保存処理
@@ -87,7 +113,7 @@ export default function MaleSetting() {
     return (
         <DefaultLayout>
             <div id="profileScreen" className="w-full p-3 bg-gray-50 overflow-y-auto relative h-[calc(100dvh-100px)] sm:h-[calc(100dvh-70px)] overflow-y-auto">
-                {(isSaving || isLoadingUser || isLoadingTargets) && (
+                {(isSaving || isLoadingUser || isLoadingTargets || isAnalyzing) && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
                         <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-500"></div>
                     </div>
@@ -95,6 +121,13 @@ export default function MaleSetting() {
                 
                 <div className="bg-white rounded-lg shadow-sm p-3">
                     <h2 className="mb-6 text-2xl font-semibold text-gray-800">あなたのプロフィール設定</h2>
+
+                    {/* スクリーンショットアップロード */}
+                    <ImageUploadForProfile
+                        onImageAnalyzed={handleImageAnalyzed}
+                        isAnalyzing={isAnalyzing}
+                        setIsAnalyzing={setIsAnalyzing}
+                    />
 
                     <div className="space-y-4">
                         {/* 名前 */}

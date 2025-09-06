@@ -3,9 +3,11 @@
 import DefaultLayout from '@/components/layout/DefaultLayout';
 import { FiSave } from 'react-icons/fi';
 import { useTargetsStore } from '@/store/targets';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSettingStore } from '@/store/setting';
 import { useUserStore } from '@/store/user';
+import ImageUploadForProfile from '@/components/ImageUploadForProfile';
+import { ProfileData } from '@/types/profile';
 
 export default function FemaleSetting() {
     const { targets, selectedTargetId, fetchTargets, isLoading: isLoadingTargets } = useTargetsStore();
@@ -23,6 +25,9 @@ export default function FemaleSetting() {
         updateFemaleField,
         resetFemaleForm
     } = useSettingStore();
+
+    // 画像解析中のステート
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     // 選択された女性のデータが変更されたら、フォームを更新
     useEffect(() => {
@@ -55,6 +60,27 @@ export default function FemaleSetting() {
     // フォーム入力の処理
     const handleInputChange = (field: string, value: string) => {
         updateFemaleField(field, value);
+    };
+
+    // 画像解析結果を受け取って自動入力
+    const handleImageAnalyzed = (profileData: ProfileData) => {
+        if (profileData.name) updateFemaleField('name', profileData.name);
+        if (profileData.age) updateFemaleField('age', profileData.age.toString());
+        if (profileData.job) updateFemaleField('job', profileData.job);
+        if (profileData.hobby) updateFemaleField('hobby', profileData.hobby);
+        if (profileData.residence) updateFemaleField('residence', profileData.residence);
+        if (profileData.workplace) updateFemaleField('workplace', profileData.workplace);
+        if (profileData.bloodType) updateFemaleField('bloodType', profileData.bloodType);
+        if (profileData.education) updateFemaleField('education', profileData.education);
+        if (profileData.workType) updateFemaleField('workType', profileData.workType);
+        if (profileData.holiday) updateFemaleField('holiday', profileData.holiday);
+        if (profileData.marriageHistory) updateFemaleField('marriageHistory', profileData.marriageHistory);
+        if (profileData.hasChildren) updateFemaleField('hasChildren', profileData.hasChildren);
+        if (profileData.smoking) updateFemaleField('smoking', profileData.smoking);
+        if (profileData.drinking) updateFemaleField('drinking', profileData.drinking);
+        if (profileData.livingWith) updateFemaleField('livingWith', profileData.livingWith);
+        if (profileData.marriageIntention) updateFemaleField('marriageIntention', profileData.marriageIntention);
+        if (profileData.selfIntroduction) updateFemaleField('selfIntroduction', profileData.selfIntroduction);
     };
 
     // 保存処理
@@ -110,7 +136,7 @@ export default function FemaleSetting() {
     return (
         <DefaultLayout>
             <div id="profileScreen" className="w-full p-3 bg-gray-50 overflow-y-auto h-[calc(100dvh-100px)] sm:h-[calc(100dvh-70px)] relative">
-                {(isSaving || isLoadingUser || isLoadingTargets) && (
+                {(isSaving || isLoadingUser || isLoadingTargets || isAnalyzing) && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
                         <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-500"></div>
                     </div>
@@ -129,6 +155,15 @@ export default function FemaleSetting() {
                         <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                             <p className="text-yellow-800">女性を選択してください。</p>
                         </div>
+                    )}
+
+                    {/* スクリーンショットアップロード */}
+                    {selectedTarget && (
+                        <ImageUploadForProfile
+                            onImageAnalyzed={handleImageAnalyzed}
+                            isAnalyzing={isAnalyzing}
+                            setIsAnalyzing={setIsAnalyzing}
+                        />
                     )}
 
                     <div className="space-y-4">
