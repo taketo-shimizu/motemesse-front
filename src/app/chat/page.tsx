@@ -349,7 +349,7 @@ export default function Chat() {
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
               placeholder={selectedTarget ? "相手からのメッセージ" : "相手を選択してください"}
-              className="flex-1 bg-gray-100 rounded-full px-4 py-2.5 focus:outline-none focus:bg-white focus:ring-1 focus:ring-gray-300"
+              className="flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-base focus:outline-none focus:bg-white focus:ring-1 focus:ring-gray-300"
               disabled={isLoading || !selectedTarget}
             />
             <button
