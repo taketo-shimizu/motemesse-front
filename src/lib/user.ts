@@ -85,7 +85,7 @@ export async function syncAuth0User(auth0User: Auth0SessionUser): Promise<Databa
     };
 
     if (dbUser) {
-      // 既存ユーザーを更新（メールアドレスが変更された場合も考慮）
+      // 既存ユーザーを更新
       const updateData: Partial<CreateUserData> = {
         picture: userData.picture,
         emailVerified: userData.emailVerified
@@ -103,8 +103,16 @@ export async function syncAuth0User(auth0User: Auth0SessionUser): Promise<Databa
 
       return await updateUser(dbUser.id, updateData);
     } else {
-      // 新規ユーザーを作成
-      return await createUser(userData);
+      // 新規ユーザーを作成（upsertを使用して重複エラーを回避）
+      return await prisma.user.upsert({
+        where: { email: auth0User.email },
+        update: {
+          auth0Id: userData.auth0Id,
+          picture: userData.picture,
+          emailVerified: userData.emailVerified
+        },
+        create: userData
+      });
     }
   } catch (error) {
     console.error('Error syncing Auth0 user:', error);
