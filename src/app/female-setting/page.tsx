@@ -8,10 +8,17 @@ import { useSettingStore } from '@/store/setting';
 import { useUserStore } from '@/store/user';
 import ImageUploadForProfile from '@/components/ImageUploadForProfile';
 import { ProfileData } from '@/types/profile';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 export default function FemaleSetting() {
-    const { targets, selectedTargetId, fetchTargets, isLoading: isLoadingTargets } = useTargetsStore();
+    const { targets, selectedTargetId, fetchTargets, selectTarget, isLoading: isLoadingTargets } = useTargetsStore();
     const { isLoading: isLoadingUser } = useUserStore();
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+    // 新規作成モードかどうかを判定
+    const isNewMode = searchParams.get('new') === 'true';
+    const nameFromQuery = searchParams.get('name');
     
     // 選択された女性のデータを取得
     const selectedTarget = targets.find(t => t.id === selectedTargetId);
@@ -20,18 +27,39 @@ export default function FemaleSetting() {
     const {
         femaleFormData,
         isSaving,
+        isFemaleAnalyzing,
         setFemaleFormData,
         setIsSaving,
         updateFemaleField,
-        resetFemaleForm
+        resetFemaleForm,
+        setIsFemaleAnalyzing,
     } = useSettingStore();
-
-    // 画像解析中のステート
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     // 選択された女性のデータが変更されたら、フォームを更新
     useEffect(() => {
-        if (selectedTarget) {
+        if (isNewMode && nameFromQuery) {
+            // 新規作成モードの場合
+            setFemaleFormData({
+                name: nameFromQuery,
+                age: '',
+                job: '',
+                hobby: '',
+                residence: '',
+                workplace: '',
+                bloodType: '',
+                education: '',
+                workType: '',
+                holiday: '',
+                marriageHistory: '',
+                hasChildren: '',
+                smoking: '',
+                drinking: '',
+                livingWith: '',
+                marriageIntention: '',
+                selfIntroduction: ''
+            });
+        } else if (selectedTarget) {
+            // 既存のターゲットを編集する場合
             setFemaleFormData({
                 name: selectedTarget.name || '',
                 age: selectedTarget.age?.toString() || '',
@@ -55,7 +83,7 @@ export default function FemaleSetting() {
             // 選択されていない場合はフォームをクリア
             resetFemaleForm();
         }
-    }, [selectedTarget, setFemaleFormData, resetFemaleForm]);
+    }, [selectedTarget, isNewMode, nameFromQuery, setFemaleFormData, resetFemaleForm]);
 
     // フォーム入力の処理
     const handleInputChange = (field: string, value: string) => {
@@ -85,11 +113,6 @@ export default function FemaleSetting() {
 
     // 保存処理
     const handleSave = async () => {
-        if (!selectedTarget) {
-            alert('女性を選択してください');
-            return;
-        }
-
         // バリデーション
         if (!femaleFormData.name.trim()) {
             alert('お名前を入力してください');
@@ -102,39 +125,86 @@ export default function FemaleSetting() {
 
         setIsSaving(true);
         try {
-            const response = await fetch('/api/targets', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    id: selectedTarget.id,
-                    name: femaleFormData.name,
-                    age: femaleFormData.age,
-                    job: femaleFormData.job,
-                    hobby: femaleFormData.hobby,
-                    residence: femaleFormData.residence,
-                    workplace: femaleFormData.workplace,
-                    bloodType: femaleFormData.bloodType,
-                    education: femaleFormData.education,
-                    workType: femaleFormData.workType,
-                    holiday: femaleFormData.holiday,
-                    marriageHistory: femaleFormData.marriageHistory,
-                    hasChildren: femaleFormData.hasChildren,
-                    smoking: femaleFormData.smoking,
-                    drinking: femaleFormData.drinking,
-                    livingWith: femaleFormData.livingWith,
-                    marriageIntention: femaleFormData.marriageIntention,
-                    selfIntroduction: femaleFormData.selfIntroduction,
-                }),
-            });
+            if (isNewMode) {
+                // 新規作成の場合
+                const response = await fetch('/api/targets', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: femaleFormData.name,
+                        age: femaleFormData.age,
+                        job: femaleFormData.job,
+                        hobby: femaleFormData.hobby,
+                        residence: femaleFormData.residence,
+                        workplace: femaleFormData.workplace,
+                        bloodType: femaleFormData.bloodType,
+                        education: femaleFormData.education,
+                        workType: femaleFormData.workType,
+                        holiday: femaleFormData.holiday,
+                        marriageHistory: femaleFormData.marriageHistory,
+                        hasChildren: femaleFormData.hasChildren,
+                        smoking: femaleFormData.smoking,
+                        drinking: femaleFormData.drinking,
+                        livingWith: femaleFormData.livingWith,
+                        marriageIntention: femaleFormData.marriageIntention,
+                        selfIntroduction: femaleFormData.selfIntroduction,
+                    }),
+                });
 
-            if (!response.ok) {
-                throw new Error('Failed to update target');
+                if (!response.ok) {
+                    throw new Error('Failed to create target');
+                }
+
+                const newTarget = await response.json();
+                await fetchTargets();
+                selectTarget(newTarget.id);
+                alert('保存しました');
+
+                // URLからクエリパラメータを削除
+                router.push('/female-setting');
+            } else {
+                // 既存のターゲットを更新する場合
+                if (!selectedTarget) {
+                    alert('女性を選択してください');
+                    return;
+                }
+
+                const response = await fetch('/api/targets', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: selectedTarget.id,
+                        name: femaleFormData.name,
+                        age: femaleFormData.age,
+                        job: femaleFormData.job,
+                        hobby: femaleFormData.hobby,
+                        residence: femaleFormData.residence,
+                        workplace: femaleFormData.workplace,
+                        bloodType: femaleFormData.bloodType,
+                        education: femaleFormData.education,
+                        workType: femaleFormData.workType,
+                        holiday: femaleFormData.holiday,
+                        marriageHistory: femaleFormData.marriageHistory,
+                        hasChildren: femaleFormData.hasChildren,
+                        smoking: femaleFormData.smoking,
+                        drinking: femaleFormData.drinking,
+                        livingWith: femaleFormData.livingWith,
+                        marriageIntention: femaleFormData.marriageIntention,
+                        selfIntroduction: femaleFormData.selfIntroduction,
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update target');
+                }
+
+                alert('保存しました');
+                await fetchTargets(); // データを更新
             }
-
-            alert('保存しました');
-            await fetchTargets(); // データを更新
         } catch (error) {
             console.error('Error saving data:', error);
             alert('保存に失敗しました');
@@ -149,7 +219,7 @@ export default function FemaleSetting() {
     return (
         <DefaultLayout>
             <div id="profileScreen" className="w-full bg-gradient-to-b from-white to-tapple-pink-pale overflow-y-auto h-[calc(100dvh-100px)] sm:h-[calc(100dvh-70px)] relative">
-                {(isSaving || isLoadingUser || isLoadingTargets || isAnalyzing) && (
+                {(isSaving || isLoadingUser || isLoadingTargets || isFemaleAnalyzing) && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
                         <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-tapple-pink"></div>
                     </div>
@@ -163,7 +233,11 @@ export default function FemaleSetting() {
                         </div>
                         <div>
                             <h2 className="text-lg font-bold">
-                                {selectedTarget ? `${selectedTarget.name}さんのプロフィール` : '相手のプロフィール設定'}
+                                {isNewMode && nameFromQuery
+                                    ? `${nameFromQuery}さんのプロフィール`
+                                    : selectedTarget
+                                        ? `${selectedTarget.name}さんのプロフィール`
+                                        : '相手のプロフィール設定'}
                             </h2>
                             <p className="text-xs opacity-90">相手の情報を入力してください</p>
                         </div>
@@ -171,23 +245,19 @@ export default function FemaleSetting() {
                 </div>
 
                 <div className="p-3">
-                    {!selectedTarget && (
+                    {!selectedTarget && !isNewMode && (
                         <div className="mb-3 p-3 bg-tapple-pink-pale border border-tapple-pink-soft rounded-xl">
                             <p className="text-sm text-tapple-pink font-medium">サイドメニューから女性を選択してください</p>
                         </div>
                     )}
 
                     {/* スクリーンショットアップロード */}
-                    {selectedTarget && (
+                    {(selectedTarget || isNewMode) && (
                         <div className="mb-4 bg-white rounded-xl p-3 shadow-sm border border-gray-100">
-                            <div className="flex items-center mb-2">
-                                <FiCamera className="w-4 h-4 text-tapple-pink mr-2" />
-                                <h3 className="text-sm font-medium text-gray-800">スクリーンショットから自動入力</h3>
-                            </div>
                             <ImageUploadForProfile
                                 onImageAnalyzed={handleImageAnalyzed}
-                                isAnalyzing={isAnalyzing}
-                                setIsAnalyzing={setIsAnalyzing}
+                                isAnalyzing={isFemaleAnalyzing}
+                                setIsAnalyzing={setIsFemaleAnalyzing}
                             />
                         </div>
                     )}
@@ -212,7 +282,7 @@ export default function FemaleSetting() {
                                     placeholder="例: 田中花子"
                                     value={femaleFormData.name}
                                     onChange={(e) => handleInputChange('name', e.target.value)}
-                                    disabled={!selectedTarget}
+                                    disabled={!selectedTarget && !isNewMode}
                                     required
                                 />
                             </div>
@@ -229,7 +299,7 @@ export default function FemaleSetting() {
                                         placeholder="例: 25"
                                         value={femaleFormData.age}
                                         onChange={(e) => handleInputChange('age', e.target.value)}
-                                        disabled={!selectedTarget}
+                                        disabled={!selectedTarget && !isNewMode}
                                         required
                                     />
                                 </div>
@@ -239,7 +309,7 @@ export default function FemaleSetting() {
                                         className="w-full border border-gray-200 rounded-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tapple-pink focus:border-transparent transition-all appearance-none bg-white"
                                         value={femaleFormData.bloodType}
                                         onChange={(e) => handleInputChange('bloodType', e.target.value)}
-                                        disabled={!selectedTarget}
+                                        disabled={!selectedTarget && !isNewMode}
                                     >
                                         <option value="">選択</option>
                                         <option value="A型">A型</option>
@@ -261,7 +331,7 @@ export default function FemaleSetting() {
                                         placeholder="東京都"
                                         value={femaleFormData.residence}
                                         onChange={(e) => handleInputChange('residence', e.target.value)}
-                                        disabled={!selectedTarget}
+                                        disabled={!selectedTarget && !isNewMode}
                                     />
                                 </div>
                                 <div>
@@ -272,7 +342,7 @@ export default function FemaleSetting() {
                                         placeholder="新宿区"
                                         value={femaleFormData.workplace}
                                         onChange={(e) => handleInputChange('workplace', e.target.value)}
-                                        disabled={!selectedTarget}
+                                        disabled={!selectedTarget && !isNewMode}
                                     />
                                 </div>
                             </div>
@@ -297,7 +367,7 @@ export default function FemaleSetting() {
                                         placeholder="看護師"
                                         value={femaleFormData.job}
                                         onChange={(e) => handleInputChange('job', e.target.value)}
-                                        disabled={!selectedTarget}
+                                        disabled={!selectedTarget && !isNewMode}
                                     />
                                 </div>
                                 <div>
@@ -306,7 +376,7 @@ export default function FemaleSetting() {
                                         className="w-full border border-gray-200 rounded-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tapple-pink focus:border-transparent transition-all appearance-none bg-white"
                                         value={femaleFormData.workType}
                                         onChange={(e) => handleInputChange('workType', e.target.value)}
-                                        disabled={!selectedTarget}
+                                        disabled={!selectedTarget && !isNewMode}
                                     >
                                         <option value="">選択</option>
                                         <option value="会社員">会社員</option>
@@ -327,7 +397,7 @@ export default function FemaleSetting() {
                                         className="w-full border border-gray-200 rounded-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tapple-pink focus:border-transparent transition-all appearance-none bg-white"
                                         value={femaleFormData.education}
                                         onChange={(e) => handleInputChange('education', e.target.value)}
-                                        disabled={!selectedTarget}
+                                        disabled={!selectedTarget && !isNewMode}
                                     >
                                         <option value="">選択</option>
                                         <option value="高校卒業">高校卒</option>
@@ -346,7 +416,7 @@ export default function FemaleSetting() {
                                         placeholder="土日祝"
                                         value={femaleFormData.holiday}
                                         onChange={(e) => handleInputChange('holiday', e.target.value)}
-                                        disabled={!selectedTarget}
+                                        disabled={!selectedTarget && !isNewMode}
                                     />
                                 </div>
                             </div>
@@ -370,7 +440,7 @@ export default function FemaleSetting() {
                                     placeholder="カフェ巡り、読書、ヨガ"
                                     value={femaleFormData.hobby}
                                     onChange={(e) => handleInputChange('hobby', e.target.value)}
-                                    disabled={!selectedTarget}
+                                    disabled={!selectedTarget && !isNewMode}
                                 ></textarea>
                             </div>
 
@@ -382,7 +452,7 @@ export default function FemaleSetting() {
                                     placeholder="こんにちは！よろしくお願いします。"
                                     value={femaleFormData.selfIntroduction}
                                     onChange={(e) => handleInputChange('selfIntroduction', e.target.value)}
-                                    disabled={!selectedTarget}
+                                    disabled={!selectedTarget && !isNewMode}
                                 ></textarea>
                             </div>
                         </div>
@@ -404,7 +474,7 @@ export default function FemaleSetting() {
                                         className="w-full border border-gray-200 rounded-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tapple-pink focus:border-transparent transition-all appearance-none bg-white"
                                         value={femaleFormData.marriageHistory}
                                         onChange={(e) => handleInputChange('marriageHistory', e.target.value)}
-                                        disabled={!selectedTarget}
+                                        disabled={!selectedTarget && !isNewMode}
                                     >
                                         <option value="">選択</option>
                                         <option value="未婚">未婚</option>
@@ -418,7 +488,7 @@ export default function FemaleSetting() {
                                         className="w-full border border-gray-200 rounded-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tapple-pink focus:border-transparent transition-all appearance-none bg-white"
                                         value={femaleFormData.hasChildren}
                                         onChange={(e) => handleInputChange('hasChildren', e.target.value)}
-                                        disabled={!selectedTarget}
+                                        disabled={!selectedTarget && !isNewMode}
                                     >
                                         <option value="">選択</option>
                                         <option value="いない">いない</option>
@@ -435,7 +505,7 @@ export default function FemaleSetting() {
                                         className="w-full border border-gray-200 rounded-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tapple-pink focus:border-transparent transition-all appearance-none bg-white"
                                         value={femaleFormData.smoking}
                                         onChange={(e) => handleInputChange('smoking', e.target.value)}
-                                        disabled={!selectedTarget}
+                                        disabled={!selectedTarget && !isNewMode}
                                     >
                                         <option value="">選択</option>
                                         <option value="吸わない">吸わない</option>
@@ -449,7 +519,7 @@ export default function FemaleSetting() {
                                         className="w-full border border-gray-200 rounded-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tapple-pink focus:border-transparent transition-all appearance-none bg-white"
                                         value={femaleFormData.drinking}
                                         onChange={(e) => handleInputChange('drinking', e.target.value)}
-                                        disabled={!selectedTarget}
+                                        disabled={!selectedTarget && !isNewMode}
                                     >
                                         <option value="">選択</option>
                                         <option value="飲まない">飲まない</option>
@@ -466,7 +536,7 @@ export default function FemaleSetting() {
                                         className="w-full border border-gray-200 rounded-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tapple-pink focus:border-transparent transition-all appearance-none bg-white"
                                         value={femaleFormData.livingWith}
                                         onChange={(e) => handleInputChange('livingWith', e.target.value)}
-                                        disabled={!selectedTarget}
+                                        disabled={!selectedTarget && !isNewMode}
                                     >
                                         <option value="">選択</option>
                                         <option value="一人暮らし">一人</option>
@@ -481,7 +551,7 @@ export default function FemaleSetting() {
                                         className="w-full border border-gray-200 rounded-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-tapple-pink focus:border-transparent transition-all appearance-none bg-white"
                                         value={femaleFormData.marriageIntention}
                                         onChange={(e) => handleInputChange('marriageIntention', e.target.value)}
-                                        disabled={!selectedTarget}
+                                        disabled={!selectedTarget && !isNewMode}
                                     >
                                         <option value="">選択</option>
                                         <option value="すぐにでもしたい">すぐに</option>
@@ -498,9 +568,9 @@ export default function FemaleSetting() {
                     <div className="pb-4 px-3">
                         <button
                             onClick={handleSave}
-                            disabled={isSaving || !selectedTarget || !isFormValid}
+                            disabled={isSaving || (!selectedTarget && !isNewMode) || !isFormValid}
                             className={`w-full py-3 rounded-full text-sm font-bold text-white transition-all shadow-md flex items-center justify-center ${
-                                !isSaving && selectedTarget && isFormValid
+                                !isSaving && (selectedTarget || isNewMode) && isFormValid
                                     ? 'bg-gradient-to-r from-tapple-pink to-tapple-pink-light active:from-tapple-pink-dark active:to-tapple-pink'
                                     : 'bg-gray-300 cursor-not-allowed'
                             }`}

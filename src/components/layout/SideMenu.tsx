@@ -44,29 +44,14 @@ export default function SideMenu() {
     }
   };
 
-  const handleAddClick = async () => {
+  const handleAddClick = () => {
     const name = prompt('女性の名前を入力してください');
-    
+
     if (!name?.trim()) return;
-    
-    try {
-      const response = await fetch('/api/targets', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name: name.trim() }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to add target');
-      }
-      await fetchTargets();
-      alert(`${name.trim()}さんを追加しました`);
-    } catch (error) {
-      console.error('Error adding target:', error);
-      alert('追加に失敗しました');
-    }
+
+    // 名前をクエリパラメータとして渡してプロフィール設定画面に遷移
+    router.push(`/female-setting?new=true&name=${encodeURIComponent(name.trim())}`);
+    closeMenu();
   };
 
   const handleDeleteClick = async () => {

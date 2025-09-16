@@ -8,22 +8,26 @@ import { useSettingStore } from '@/store/setting';
 import { useTargetsStore } from '@/store/targets';
 import ImageUploadForProfile from '@/components/ImageUploadForProfile';
 import { ProfileData } from '@/types/profile';
+import { useRouter } from 'next/navigation';
 
 export default function MaleSetting() {
     const { user, updateUser, isLoading: isLoadingUser } = useUserStore();
     const { isLoading: isLoadingTargets } = useTargetsStore();
+    const router = useRouter();
 
     // Zustandストアから状態を取得
     const {
         maleFormData,
         isSaving,
+        isUserAnalyzing,
         setMaleFormData,
         setIsSaving,
         updateMaleField,
+        setIsUserAnalyzing,
     } = useSettingStore();
 
-    // 画像解析中のステート
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    // 初回プロフィール設定かどうかを判定
+    const isFirstTimeSetup = user && (!user.name || !user.age);
 
     // ユーザー（男性）のデータが変更されたら、フォームを更新
     useEffect(() => {
@@ -111,6 +115,11 @@ export default function MaleSetting() {
                     selfIntroduction: maleFormData.selfIntroduction,
                 });
                 alert('保存しました');
+
+                // 初回設定完了後はchat画面に遷移
+                if (isFirstTimeSetup) {
+                    router.push('/chat');
+                }
             }
         } catch (error) {
             console.error('Error saving data:', error);
@@ -126,7 +135,7 @@ export default function MaleSetting() {
     return (
         <DefaultLayout>
             <div id="profileScreen" className="w-full bg-gradient-to-b from-white to-tapple-pink-pale overflow-y-auto relative h-[calc(100dvh-100px)] sm:h-[calc(100dvh-70px)]">
-                {(isSaving || isLoadingUser || isLoadingTargets || isAnalyzing) && (
+                {(isSaving || isLoadingUser || isLoadingTargets || isUserAnalyzing) && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
                         <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-tapple-pink"></div>
                     </div>
@@ -140,22 +149,32 @@ export default function MaleSetting() {
                         </div>
                         <div>
                             <h2 className="text-lg font-bold">プロフィール設定</h2>
-                            <p className="text-xs opacity-90">あなたの情報を入力してください</p>
+                            <p className="text-xs opacity-90">
+                                {isFirstTimeSetup
+                                    ? '初回設定です。必須項目を入力してください'
+                                    : 'あなたの情報を入力してください'}
+                            </p>
                         </div>
                     </div>
                 </div>
 
                 <div className="p-3">
+                    {/* 初回設定の通知 */}
+                    {isFirstTimeSetup && (
+                        <div className="mb-4 p-3 bg-tapple-pink-pale border border-tapple-pink-soft rounded-xl">
+                            <p className="text-sm text-tapple-pink font-medium">
+                                ようこそ！まずはプロフィールを設定してください。
+                                名前と年齢は必須項目です。
+                            </p>
+                        </div>
+                    )}
+
                     {/* スクリーンショットアップロード */}
                     <div className="mb-4 bg-white rounded-xl p-3 shadow-sm border border-gray-100">
-                        <div className="flex items-center mb-2">
-                            <FiCamera className="w-4 h-4 text-tapple-pink mr-2" />
-                            <h3 className="text-sm font-medium text-gray-800">スクリーンショットから自動入力</h3>
-                        </div>
                         <ImageUploadForProfile
                             onImageAnalyzed={handleImageAnalyzed}
-                            isAnalyzing={isAnalyzing}
-                            setIsAnalyzing={setIsAnalyzing}
+                            isAnalyzing={isUserAnalyzing}
+                            setIsAnalyzing={setIsUserAnalyzing}
                         />
                     </div>
 

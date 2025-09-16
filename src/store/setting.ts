@@ -33,6 +33,11 @@ interface SettingState {
   updateFemaleField: (field: string, value: string) => void;
   
   resetFemaleForm: () => void;
+  isUserAnalyzing: boolean;
+  isFemaleAnalyzing: boolean;
+
+  setIsUserAnalyzing: (analyzing: boolean) => void;
+  setIsFemaleAnalyzing: (analyzing: boolean) => void;
 }
 
 const initialFormData: ProfileFormData = {
@@ -59,6 +64,8 @@ export const useSettingStore = create<SettingState>((set) => ({
   maleFormData: initialFormData,
   femaleFormData: initialFormData,
   isSaving: false,
+  isUserAnalyzing: false,
+  isFemaleAnalyzing: false,
   
   setMaleFormData: (data) => set({ maleFormData: data }),
   setFemaleFormData: (data) => set({ femaleFormData: data }),
@@ -74,5 +81,8 @@ export const useSettingStore = create<SettingState>((set) => ({
       femaleFormData: { ...state.femaleFormData, [field]: value }
     })),
     
-  resetFemaleForm: () => set({ femaleFormData: initialFormData })
+  resetFemaleForm: () => set({ femaleFormData: initialFormData }),
+
+  setIsUserAnalyzing: (analyzing) => set({ isUserAnalyzing: analyzing }),
+  setIsFemaleAnalyzing: (analyzing) => set({ isFemaleAnalyzing: analyzing }),
 }));

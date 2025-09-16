@@ -55,7 +55,25 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name } = body;
+    const {
+      name,
+      age,
+      job,
+      hobby,
+      residence,
+      workplace,
+      bloodType,
+      education,
+      workType,
+      holiday,
+      marriageHistory,
+      hasChildren,
+      smoking,
+      drinking,
+      livingWith,
+      marriageIntention,
+      selfIntroduction
+    } = body;
 
     if (!name || typeof name !== 'string') {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
@@ -70,10 +88,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Create new target
+    // Create new target with all profile data
     const target = await prisma.target.create({
       data: {
         name: name.trim(),
+        age: age ? parseInt(age) : null,
+        job: job || null,
+        hobby: hobby || null,
+        residence: residence || null,
+        workplace: workplace || null,
+        bloodType: bloodType || null,
+        education: education || null,
+        workType: workType || null,
+        holiday: holiday || null,
+        marriageHistory: marriageHistory || null,
+        hasChildren: hasChildren || null,
+        smoking: smoking || null,
+        drinking: drinking || null,
+        livingWith: livingWith || null,
+        marriageIntention: marriageIntention || null,
+        selfIntroduction: selfIntroduction || null,
         userId: user.id
       }
     });
