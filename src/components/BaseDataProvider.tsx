@@ -8,7 +8,6 @@ import { useRouter, usePathname } from 'next/navigation';
 
 export default function BaseDataProvider({ children }: { children: React.ReactNode }) {
   const { user, isLoading: userLoading } = useUser();
-  const fetchTargets = useTargetsStore((state) => state.fetchTargets);
   const setSelectedTargetFromRecentTarget = useTargetsStore((state) => state.setSelectedTargetFromRecentTarget);
   const syncUser = useUserStore((state) => state.syncUser);
   const router = useRouter();
@@ -17,11 +16,8 @@ export default function BaseDataProvider({ children }: { children: React.ReactNo
   useEffect(() => {
     // ユーザー情報が読み込まれて、ログインしている場合のみデータを取得
     if (!userLoading && user) {
-      // ユーザー情報とターゲット情報を並行して取得
-      Promise.all([
-        syncUser(),
-        fetchTargets()
-      ]).then(() => {
+      // ユーザー情報のみ取得
+      syncUser().then(() => {
         // ユーザー同期後、recent_target_idがある場合はselectedTargetIdに設定
         const currentUser = useUserStore.getState().user;
 
@@ -41,7 +37,7 @@ export default function BaseDataProvider({ children }: { children: React.ReactNo
         console.error('Error initializing app data:', error);
       });
     }
-  }, [user, userLoading, fetchTargets, syncUser, setSelectedTargetFromRecentTarget, router, pathname]);
+  }, [user, userLoading, syncUser, setSelectedTargetFromRecentTarget, router, pathname]);
 
   return <>{children}</>;
 }
