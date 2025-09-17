@@ -111,6 +111,13 @@ export async function POST(request: Request) {
         userId: user.id
       }
     });
+    console.log('target', target);
+
+    // Update user's recent_target_id to the newly created target
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { recentTargetId: target.id }
+    });
 
     return NextResponse.json(target);
   } catch (error) {
@@ -173,6 +180,18 @@ export async function DELETE(request: Request) {
       where: { id: targetId }
     });
 
+    // Find the most recently updated target for this user to set as recent_target_id
+    const mostRecentTarget = await prisma.target.findFirst({
+      where: { userId: user.id },
+      orderBy: { updatedAt: 'desc' }
+    });
+
+    // Update user's recent_target_id (null if no targets remain)
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { recentTargetId: mostRecentTarget?.id || null }
+    });
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting target:', error);
@@ -196,7 +215,7 @@ export async function PUT(request: Request) {
 
     const body = await request.json();
     const {
-      id, name,age, job, hobby, selfIntroduction,
+      id, name, age, job, hobby, selfIntroduction,
       residence, workplace, bloodType, education, workType, holiday,
       marriageHistory, hasChildren, smoking, drinking, livingWith, marriageIntention
     } = body;
@@ -255,6 +274,12 @@ export async function PUT(request: Request) {
         livingWith: livingWith || null,
         marriageIntention: marriageIntention || null,
       }
+    });
+
+    // Update user's recent_target_id to the updated target
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { recentTargetId: targetId }
     });
 
     return NextResponse.json(updatedTarget);

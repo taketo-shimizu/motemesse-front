@@ -11,8 +11,8 @@ import { useTargetsStore } from '@/store/targets';
 export default function SideMenu() {
   const { isOpen, closeMenu } = useSideMenuStore();
   const router = useRouter();
-  const { user, updateTone, updateRecentTargetId } = useUserStore();
-  const { targets, selectedTargetId, selectTarget, fetchTargets, handleSelectChange } = useTargetsStore();
+  const { user, updateTone, updateRecentTargetId, syncUser } = useUserStore();
+  const { targets, selectedTargetId, selectTarget, fetchTargets, handleSelectChange, setNewTargetInfo, clearNewTargetInfo } = useTargetsStore();
 
   // コンポーネントマウント時にターゲット情報を取得
   useEffect(() => {
@@ -43,6 +43,11 @@ export default function SideMenu() {
     const targetIdString = e.target.value;
     const targetId = targetIdString ? parseInt(targetIdString, 10) : null;
 
+    // 既存の女性を選択した場合は新規作成モードをクリア
+    if (targetId) {
+      clearNewTargetInfo();
+    }
+
     try {
       await updateRecentTargetId(targetId);
     } catch (error) {
@@ -55,8 +60,14 @@ export default function SideMenu() {
 
     if (!name?.trim()) return;
 
-    // 名前をクエリパラメータとして渡してプロフィール設定画面に遷移
-    router.push(`/female-setting?new=true&name=${encodeURIComponent(name.trim())}`);
+    // 新規作成情報をストアに保存
+    setNewTargetInfo({
+      isNewMode: true,
+      name: name.trim()
+    });
+
+    // プロフィール設定画面に遷移
+    router.push('/female-setting');
     closeMenu();
   };
 
@@ -81,8 +92,20 @@ export default function SideMenu() {
         throw new Error('Failed to delete target');
       }
 
-      selectTarget(null);
+      // ターゲット一覧を更新
       await fetchTargets();
+
+      // ユーザー情報を同期して最新のrecent_target_idを取得
+      await syncUser();
+
+      // 最新のユーザー情報から選択すべきターゲットを決定
+      const updatedUser = useUserStore.getState().user;
+      if (updatedUser?.recentTargetId) {
+        selectTarget(updatedUser.recentTargetId);
+      } else {
+        selectTarget(null);
+      }
+
       alert(`${selectedTarget.name}さんを削除しました`);
     } catch (error) {
       console.error('Error deleting target:', error);

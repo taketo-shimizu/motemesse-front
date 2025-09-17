@@ -1,25 +1,25 @@
 'use client';
 
 import DefaultLayout from '@/components/layout/DefaultLayout';
-import { FiSave, FiCamera } from 'react-icons/fi';
+import { FiSave } from 'react-icons/fi';
 import { useTargetsStore } from '@/store/targets';
 import { useEffect, useState } from 'react';
 import { useSettingStore } from '@/store/setting';
 import { useUserStore } from '@/store/user';
 import ImageUploadForProfile from '@/components/ImageUploadForProfile';
 import { ProfileData } from '@/types/profile';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 export default function FemaleSetting() {
-    const { targets, selectedTargetId, fetchTargets, selectTarget, isLoading: isLoadingTargets } = useTargetsStore();
+    const { targets, selectedTargetId, fetchTargets, selectTarget, isLoading: isLoadingTargets, newTargetInfo, clearNewTargetInfo } = useTargetsStore();
+    const { syncUser } = useUserStore();
     const { isLoading: isLoadingUser } = useUserStore();
-    const searchParams = useSearchParams();
     const router = useRouter();
 
-    // 新規作成モードかどうかを判定
-    const isNewMode = searchParams.get('new') === 'true';
-    const nameFromQuery = searchParams.get('name');
-    
+    // ストアから新規作成情報を取得
+    const isNewMode = newTargetInfo?.isNewMode || false;
+    const nameFromStore = newTargetInfo?.name || null;
+
     // 選択された女性のデータを取得
     const selectedTarget = targets.find(t => t.id === selectedTargetId);
 
@@ -35,12 +35,12 @@ export default function FemaleSetting() {
         setIsFemaleAnalyzing,
     } = useSettingStore();
 
-    // 選択された女性のデータが変更されたら、フォームを更新
+    // 選択された女性のデータまたは新規作成モードが変更されたら、フォームを更新
     useEffect(() => {
-        if (isNewMode && nameFromQuery) {
+        if (isNewMode && nameFromStore) {
             // 新規作成モードの場合
             setFemaleFormData({
-                name: nameFromQuery,
+                name: nameFromStore,
                 age: '',
                 job: '',
                 hobby: '',
@@ -83,7 +83,7 @@ export default function FemaleSetting() {
             // 選択されていない場合はフォームをクリア
             resetFemaleForm();
         }
-    }, [selectedTarget, isNewMode, nameFromQuery, setFemaleFormData, resetFemaleForm]);
+    }, [selectedTarget, isNewMode, nameFromStore, setFemaleFormData, resetFemaleForm]);
 
     // フォーム入力の処理
     const handleInputChange = (field: string, value: string) => {
@@ -160,6 +160,7 @@ export default function FemaleSetting() {
                 const newTarget = await response.json();
                 await fetchTargets();
                 selectTarget(newTarget.id);
+                await syncUser(); // ユーザー情報も同期（recent_target_idを更新）
                 alert('保存しました');
 
                 // URLからクエリパラメータを削除
@@ -202,13 +203,17 @@ export default function FemaleSetting() {
                     throw new Error('Failed to update target');
                 }
 
+                const updatedTarget = await response.json();
                 alert('保存しました');
                 await fetchTargets(); // データを更新
+                selectTarget(updatedTarget.id); // 更新されたターゲットを選択状態に
+                await syncUser(); // ユーザー情報も同期（recent_target_idを更新）
             }
         } catch (error) {
             console.error('Error saving data:', error);
             alert('保存に失敗しました');
         } finally {
+            clearNewTargetInfo();
             setIsSaving(false);
         }
     };
@@ -233,8 +238,8 @@ export default function FemaleSetting() {
                         </div>
                         <div>
                             <h2 className="text-lg font-bold">
-                                {isNewMode && nameFromQuery
-                                    ? `${nameFromQuery}さんのプロフィール`
+                                {isNewMode && nameFromStore
+                                    ? `${nameFromStore}さんのプロフィール`
                                     : selectedTarget
                                         ? `${selectedTarget.name}さんのプロフィール`
                                         : '相手のプロフィール設定'}
@@ -569,11 +574,10 @@ export default function FemaleSetting() {
                         <button
                             onClick={handleSave}
                             disabled={isSaving || (!selectedTarget && !isNewMode) || !isFormValid}
-                            className={`w-full py-3 rounded-full text-sm font-bold text-white transition-all shadow-md flex items-center justify-center ${
-                                !isSaving && (selectedTarget || isNewMode) && isFormValid
-                                    ? 'bg-gradient-to-r from-tapple-pink to-tapple-pink-light active:from-tapple-pink-dark active:to-tapple-pink'
-                                    : 'bg-gray-300 cursor-not-allowed'
-                            }`}
+                            className={`w-full py-3 rounded-full text-sm font-bold text-white transition-all shadow-md flex items-center justify-center ${!isSaving && (selectedTarget || isNewMode) && isFormValid
+                                ? 'bg-gradient-to-r from-tapple-pink to-tapple-pink-light active:from-tapple-pink-dark active:to-tapple-pink'
+                                : 'bg-gray-300 cursor-not-allowed'
+                                }`}
                         >
                             <FiSave className="w-4 h-4 mr-2" />
                             {isSaving ? '保存中...' : 'プロフィールを保存'}

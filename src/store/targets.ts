@@ -25,15 +25,23 @@ interface Target {
   updatedAt: Date;
 }
 
+interface NewTargetInfo {
+  isNewMode: boolean;
+  name: string;
+}
+
 interface TargetsState {
   targets: Target[];
   selectedTargetId: number | null;
   isLoading: boolean;
   error: string | null;
+  newTargetInfo: NewTargetInfo | null;
   fetchTargets: () => Promise<void>;
   selectTarget: (targetId: number | null) => void;
   handleSelectChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   setSelectedTargetFromRecentTarget: (recentTargetId: number | null) => void;
+  setNewTargetInfo: (info: NewTargetInfo) => void;
+  clearNewTargetInfo: () => void;
 }
 
 export const useTargetsStore = create<TargetsState>((set) => ({
@@ -41,6 +49,7 @@ export const useTargetsStore = create<TargetsState>((set) => ({
   selectedTargetId: null,
   isLoading: false,
   error: null,
+  newTargetInfo: null,
 
   fetchTargets: async () => {
     set({ isLoading: true, error: null });
@@ -70,5 +79,13 @@ export const useTargetsStore = create<TargetsState>((set) => ({
 
   setSelectedTargetFromRecentTarget: (recentTargetId: number | null) => {
     set({ selectedTargetId: recentTargetId });
+  },
+
+  setNewTargetInfo: (info: NewTargetInfo) => {
+    set({ newTargetInfo: info });
+  },
+
+  clearNewTargetInfo: () => {
+    set({ newTargetInfo: null });
   },
 }));
