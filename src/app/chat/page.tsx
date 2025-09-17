@@ -90,7 +90,7 @@ export default function Chat() {
     setCurrentFemaleMessage(message.trim());
 
     try {
-      const response = await fetch('/api/proxy/langchain/generate-reply', {
+      const response = await fetchWithRetry('/api/proxy/langchain/generate-reply', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -120,10 +120,44 @@ export default function Chat() {
       setMessage(''); // 入力欄をクリア
     } catch (error) {
       console.error('エラーが発生しました:', error);
-      setError('返信候補の生成中にエラーが発生しました');
+      setError('返信候補の生成中にエラーが発生しました。サーバーが起動中の可能性があります。もう一度お試しください。');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // リトライ機能付きのfetch関数
+  const fetchWithRetry = async (url: string, options: RequestInit, maxRetries = 2): Promise<Response> => {
+    for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
+      try {
+        console.log(`API呼び出し試行 ${attempt}/${maxRetries + 1}`);
+        const response = await fetch(url, options);
+
+        if (response.ok) {
+          return response;
+        }
+
+        // 500エラーの場合はリトライ、それ以外はそのまま返す
+        if (response.status === 500 && attempt <= maxRetries) {
+          console.log(`500エラーが発生しました。${3}秒後にリトライします...`);
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          continue;
+        }
+
+        return response;
+      } catch (error) {
+        console.error(`試行 ${attempt} でエラーが発生:`, error);
+
+        if (attempt <= maxRetries) {
+          console.log(`${3}秒後にリトライします...`);
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          continue;
+        }
+
+        throw error;
+      }
+    }
+    throw new Error('All retry attempts failed');
   };
 
   // 初回挨拶メッセージ（あなたからの最初のメッセージ）候補を生成
@@ -135,7 +169,7 @@ export default function Chat() {
     setIsGeneratingInitial(true);
     setError(null);
     try {
-      const response = await fetch('/api/proxy/langchain/generate-initial-greeting', {
+      const response = await fetchWithRetry('/api/proxy/langchain/generate-initial-greeting', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -147,9 +181,11 @@ export default function Chat() {
           //type: '軽いノリの敬語'
         })
       });
+
       if (!response.ok) {
         throw new Error('初回挨拶の生成に失敗しました');
       }
+
       const data = await response.json();
       const candidates = data.replies.map((reply: { id: number; text: string }) => ({
         ...reply,
@@ -160,7 +196,7 @@ export default function Chat() {
       setShowCandidates(true);
     } catch (error) {
       console.error('初回挨拶の生成に失敗しました:', error);
-      setError('初回挨拶の生成中にエラーが発生しました');
+      setError('初回挨拶の生成中にエラーが発生しました。サーバーが起動中の可能性があります。もう一度お試しください。');
     } finally {
       setIsGeneratingInitial(false);
     }
@@ -237,24 +273,27 @@ export default function Chat() {
     }
   };
 
-  console.log(replyCandidates)
-  const replyCandidates2 = [
-    {editText: "改めまして、ももさん初めまして！ドライブや旅行が好きとのことですが、最近行かれたお気に入りの場所などありますか？もしよろしければ、今度一緒に都内か千葉でお出かけしませんか？土日なら比較的調整できますが、ご都合いかがでしょう？",
-    id: 1,
-    isEditing: true,
-    text: "改めまして、ももさん初めまして！ドライブや旅行が好きとのことですが、最近行かれたお気に入りの場所などありますか？もしよろしければ、今度一緒に都内か千葉でお出かけしませんか？土日なら比較的調整できますが、ご都合いかがでしょう？"
-  },
-  {editText: "ももさん、改めてこんにちは！僕も買い物やお出かけ好きなので、お話し合いそうで嬉しいです。もしよかったら、都内のカフェか千葉のおすすめスポットで軽くお茶でもどうですか？土日でしたらお時間合わせられますので、ご都合よければ教えてください！",
-    id: 2,
-    isEditing: false,
-    text: "ももさん、改めてこんにちは！僕も買い物やお出かけ好きなので、お話し合いそうで嬉しいです。もしよかったら、都内のカフェか千葉のおすすめスポットで軽くお茶でもどうですか？土日でしたらお時間合わせられますので、ご都合よければ教えてください！"
-  },
-  {editText: "初めまして＆ありがとうございます！共通の趣味が多いですね。千葉だとディズニー系とかもお好きですか？お互い気軽に楽しめそうなドライブかカフェ巡り、今度ご一緒しませんか？土日どちらかご予定どうでしょう？",
-    id: 3,
-    isEditing: false,
-    text: "初めまして＆ありがとうございます！共通の趣味が多いですね。千葉だとディズニー系とかもお好きですか？お互い気軽に楽しめそうなドライブかカフェ巡り、今度ご一緒しませんか？土日どちらかご予定どうでしょう？"
-  }
-  ]
+  // テストデータとして残す
+  /*const replyCandidates2 = [
+    {
+      editText: "改めまして、ももさん初めまして！ドライブや旅行が好きとのことですが、最近行かれたお気に入りの場所などありますか？もしよろしければ、今度一緒に都内か千葉でお出かけしませんか？土日なら比較的調整できますが、ご都合いかがでしょう？",
+      id: 1,
+      isEditing: true,
+      text: "改めまして、ももさん初めまして！ドライブや旅行が好きとのことですが、最近行かれたお気に入りの場所などありますか？もしよろしければ、今度一緒に都内か千葉でお出かけしませんか？土日なら比較的調整できますが、ご都合いかがでしょう？"
+    },
+    {
+      editText: "ももさん、改めてこんにちは！僕も買い物やお出かけ好きなので、お話し合いそうで嬉しいです。もしよかったら、都内のカフェか千葉のおすすめスポットで軽くお茶でもどうですか？土日でしたらお時間合わせられますので、ご都合よければ教えてください！",
+      id: 2,
+      isEditing: false,
+      text: "ももさん、改めてこんにちは！僕も買い物やお出かけ好きなので、お話し合いそうで嬉しいです。もしよかったら、都内のカフェか千葉のおすすめスポットで軽くお茶でもどうですか？土日でしたらお時間合わせられますので、ご都合よければ教えてください！"
+    },
+    {
+      editText: "初めまして＆ありがとうございます！共通の趣味が多いですね。千葉だとディズニー系とかもお好きですか？お互い気軽に楽しめそうなドライブかカフェ巡り、今度ご一緒しませんか？土日どちらかご予定どうでしょう？",
+      id: 3,
+      isEditing: false,
+      text: "初めまして＆ありがとうございます！共通の趣味が多いですね。千葉だとディズニー系とかもお好きですか？お互い気軽に楽しめそうなドライブかカフェ巡り、今度ご一緒しませんか？土日どちらかご予定どうでしょう？"
+    }
+  ]*/
 
 
   return (
@@ -326,9 +365,9 @@ export default function Chat() {
                       >
                         コピー
                       </button>
-                      </div>
                     </div>
                   </div>
+                </div>
               ))}
             </div>
           )}
@@ -364,7 +403,7 @@ export default function Chat() {
                 </svg>
               ) : (
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                 </svg>
               )}
             </button>
@@ -389,11 +428,10 @@ export default function Chat() {
               {replyCandidates.map((candidate, index) => (
                 <div
                   key={candidate.id}
-                  className={`relative text-xs rounded-2xl transition-all ${
-                    candidate.isEditing
-                      ? 'bg-gray-50 ring-2 ring-tapple-pink'
-                      : 'bg-gray-50 hover:bg-gray-100'
-                  }`}
+                  className={`relative text-xs rounded-2xl transition-all ${candidate.isEditing
+                    ? 'bg-gray-50 ring-2 ring-tapple-pink'
+                    : 'bg-gray-50 hover:bg-gray-100'
+                    }`}
                 >
                   {candidate.isEditing ? (
                     <div className="p-4">
