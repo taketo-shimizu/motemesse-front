@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getSession } from '@auth0/nextjs-auth0';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 // 会話履歴を取得
 export async function GET(request: NextRequest) {
