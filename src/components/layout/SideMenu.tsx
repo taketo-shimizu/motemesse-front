@@ -92,19 +92,10 @@ export default function SideMenu() {
         throw new Error('Failed to delete target');
       }
 
+      selectTarget(null);
+
       // ターゲット一覧を更新
       await fetchTargets();
-
-      // ユーザー情報を同期して最新のrecent_target_idを取得
-      await syncUser();
-
-      // 最新のユーザー情報から選択すべきターゲットを決定
-      const updatedUser = useUserStore.getState().user;
-      if (updatedUser?.recentTargetId) {
-        selectTarget(updatedUser.recentTargetId);
-      } else {
-        selectTarget(null);
-      }
 
       alert(`${selectedTarget.name}さんを削除しました`);
     } catch (error) {

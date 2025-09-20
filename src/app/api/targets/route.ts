@@ -178,18 +178,6 @@ export async function DELETE(request: Request) {
       where: { id: targetId }
     });
 
-    // Find the most recently updated target for this user to set as recent_target_id
-    const mostRecentTarget = await prisma.target.findFirst({
-      where: { userId: user.id },
-      orderBy: { updatedAt: 'desc' }
-    });
-
-    // Update user's recent_target_id (null if no targets remain)
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { recentTargetId: mostRecentTarget?.id || null }
-    });
-
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting target:', error);
