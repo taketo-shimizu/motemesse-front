@@ -588,7 +588,7 @@ export default function Chat() {
                             onClick={() => handleSelectCandidate(candidate)}
                             className="px-4 py-2 bg-tapple-pink text-white font-bold rounded-full font-medium hover:bg-tapple-pink-dark transition-colors"
                           >
-                            送信
+                            確定
                           </button>
                         </div>
                       </div>
