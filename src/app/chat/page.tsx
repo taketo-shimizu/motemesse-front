@@ -319,20 +319,18 @@ export default function Chat() {
 
       const result = await response.json();
 
-      // 新規メッセージが見つかった場合
-      if (result.newMessages && result.newMessages.length > 0) {
-        // 会話履歴を再取得
+      // 保存されたメッセージがある場合は会話履歴を再取得
+      if (result.savedCount > 0) {
         await fetchConversations();
+      }
 
-        // 最新の相手メッセージがある場合は意図選択を表示
-        const lastFemaleMessage = result.newMessages
-          .filter((msg: any) => msg.sender === 'female')
-          .pop();
-
-        if (lastFemaleMessage) {
-          setCurrentFemaleMessage(lastFemaleMessage.text);
-          setShowIntentOptions(true);
-        }
+      // 返信待ちの女性メッセージがある場合は意図選択を表示
+      if (result.pendingFemaleMessage) {
+        setCurrentFemaleMessage(result.pendingFemaleMessage);
+        setShowIntentOptions(true);
+      } else if (!result.savedCount && (!result.newMessages || result.newMessages.length === 0)) {
+        // 新規メッセージが見つからなかった場合
+        setError('新しいメッセージが見つかりませんでした');
       }
 
       // ファイル入力をリセット
