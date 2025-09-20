@@ -30,7 +30,8 @@ interface ChatState {
   error: string | null;
   showCandidates: boolean;
   currentFemaleMessage: string;
-  
+  showIntentOptions: boolean;
+
   setMessage: (message: string) => void;
   setReplyCandidates: (candidates: ReplyCandidate[]) => void;
   setConversations: (conversations: Conversation[]) => void;
@@ -40,7 +41,8 @@ interface ChatState {
   setError: (error: string | null) => void;
   setShowCandidates: (show: boolean) => void;
   setCurrentFemaleMessage: (message: string) => void;
-  
+  setShowIntentOptions: (show: boolean) => void;
+
   updateReplyCandidate: (id: number, updates: Partial<ReplyCandidate>) => void;
   resetChatState: () => void;
 }
@@ -55,7 +57,8 @@ export const useChatStore = create<ChatState>((set) => ({
   error: null,
   showCandidates: false,
   currentFemaleMessage: '',
-  
+  showIntentOptions: false,
+
   setMessage: (message) => set({ message }),
   setReplyCandidates: (candidates) => set({ replyCandidates: candidates }),
   setConversations: (conversations) => set({ conversations }),
@@ -65,6 +68,7 @@ export const useChatStore = create<ChatState>((set) => ({
   setError: (error) => set({ error }),
   setShowCandidates: (show) => set({ showCandidates: show }),
   setCurrentFemaleMessage: (message) => set({ currentFemaleMessage: message }),
+  setShowIntentOptions: (show) => set({ showIntentOptions: show }),
   
   updateReplyCandidate: (id, updates) => 
     set((state) => ({
@@ -73,12 +77,13 @@ export const useChatStore = create<ChatState>((set) => ({
       )
     })),
     
-  resetChatState: () => 
+  resetChatState: () =>
     set({
       showCandidates: false,
       replyCandidates: [],
       message: '',
       error: null,
-      currentFemaleMessage: ''
+      currentFemaleMessage: '',
+      showIntentOptions: false
     })
 }));

@@ -2,7 +2,7 @@
 
 import DefaultLayout from '@/components/layout/DefaultLayout';
 import { useTargetsStore } from '@/store/targets';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import { useUserStore } from '@/store/user';
 import { useChatStore } from '@/store/chat';
 
@@ -20,6 +20,7 @@ export default function Chat() {
     error,
     showCandidates,
     currentFemaleMessage,
+    showIntentOptions,
     setMessage,
     setReplyCandidates,
     setConversations,
@@ -29,9 +30,14 @@ export default function Chat() {
     setError,
     setShowCandidates,
     setCurrentFemaleMessage,
+    setShowIntentOptions,
     updateReplyCandidate,
     resetChatState
   } = useChatStore();
+
+  // スクリーンショットアップロード関連のstate
+  const [isUploadingScreenshot, setIsUploadingScreenshot] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 選択されたターゲットの情報を取得
   const selectedTarget = targets.find(t => t.id === selectedTargetId);
@@ -273,6 +279,74 @@ export default function Chat() {
     }
   };
 
+  // スクリーンショットアップロード処理（プロフィールと同じ方式）
+  const handleScreenshotUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0 || !selectedTargetId || !user) return;
+
+    setIsUploadingScreenshot(true);
+    setError(null);
+
+    try {
+      // 画像をBase64に変換
+      const imagePromises = Array.from(files).map(file => {
+        return new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      });
+
+      const images = await Promise.all(imagePromises);
+
+      // APIを呼び出し
+      const response = await fetch('/api/proxy/screenshot/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          images,
+          userId: user.id,
+          targetId: selectedTargetId
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('スクリーンショットの解析に失敗しました');
+      }
+
+      const result = await response.json();
+
+      // 新規メッセージが見つかった場合
+      if (result.newMessages && result.newMessages.length > 0) {
+        // 会話履歴を再取得
+        await fetchConversations();
+
+        // 最新の相手メッセージがある場合は意図選択を表示
+        const lastFemaleMessage = result.newMessages
+          .filter((msg: any) => msg.sender === 'female')
+          .pop();
+
+        if (lastFemaleMessage) {
+          setCurrentFemaleMessage(lastFemaleMessage.text);
+          setShowIntentOptions(true);
+        }
+      }
+
+      // ファイル入力をリセット
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('スクリーンショットアップロードエラー:', error);
+      setError('スクリーンショットの処理中にエラーが発生しました');
+    } finally {
+      setIsUploadingScreenshot(false);
+    }
+  };
+
   // テストデータとして残す
   /*const replyCandidates2 = [
     {
@@ -306,11 +380,8 @@ export default function Chat() {
         )}
 
         {/* ヘッダー */}
-        <div className="bg-white shadow-sm p-4 flex items-center gap-2">
+        <div className="bg-white shadow-sm p-4">
           <span className="text-base sm:text-lg font-semibold">{selectedTarget ? selectedTarget.name : 'チャット'}</span>
-          <svg className="w-4 h-4 text-[#1DA1F2]" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-          </svg>
         </div>
 
         {/* 会話履歴エリア */}
@@ -340,7 +411,7 @@ export default function Chat() {
             </div>
           ) : (
             <div className="space-y-4">
-              {conversations.map((conversation, index) => (
+              {conversations.map((conversation) => (
                 <div key={conversation.id} className="space-y-3">
                   {/* 女性からのメッセージ */}
                   {conversation.femaleMessage && conversation.femaleMessage.trim() !== '' && (
@@ -382,6 +453,33 @@ export default function Chat() {
         {/* メッセージ入力エリア */}
         <div className="bg-white p-4 h-[80px]">
           <div className="flex items-center space-x-2">
+            {/* スクリーンショットアップロードボタン */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleScreenshotUpload}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploadingScreenshot || !selectedTarget}
+              className="p-2 text-gray-600 hover:text-tapple-pink disabled:text-gray-300 transition-colors"
+              title="スクリーンショットをアップロード"
+            >
+              {isUploadingScreenshot ? (
+                <svg className="animate-spin h-6 w-6" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              )}
+            </button>
+
             <input
               type="text"
               value={message}
