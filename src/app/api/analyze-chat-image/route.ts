@@ -8,20 +8,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { images, userId, targetId } = await request.json();
+    const { image, userId, targetId } = await request.json();
 
-    if (!images || images.length === 0) {
-      return NextResponse.json({ error: 'No images provided' }, { status: 400 });
+    if (!image) {
+      return NextResponse.json({ error: 'No image provided' }, { status: 400 });
     }
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-    const response = await fetch(`${apiUrl}/api/screenshot/analyze-chat`, {
+    const response = await fetch(`${apiUrl}/api/vision/analyze-chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ images, userId, targetId }),
+      body: JSON.stringify({ image, userId, targetId }),
     });
 
     if (!response.ok) {

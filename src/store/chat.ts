@@ -31,6 +31,7 @@ interface ChatState {
   showCandidates: boolean;
   currentFemaleMessage: string;
   showIntentOptions: boolean;
+  isUploadingScreenshot: boolean;
 
   setMessage: (message: string) => void;
   setReplyCandidates: (candidates: ReplyCandidate[]) => void;
@@ -42,6 +43,7 @@ interface ChatState {
   setShowCandidates: (show: boolean) => void;
   setCurrentFemaleMessage: (message: string) => void;
   setShowIntentOptions: (show: boolean) => void;
+  setIsUploadingScreenshot: (isUploading: boolean) => void;
 
   updateReplyCandidate: (id: number, updates: Partial<ReplyCandidate>) => void;
   resetChatState: () => void;
@@ -58,6 +60,7 @@ export const useChatStore = create<ChatState>((set) => ({
   showCandidates: false,
   currentFemaleMessage: '',
   showIntentOptions: false,
+  isUploadingScreenshot: false,
 
   setMessage: (message) => set({ message }),
   setReplyCandidates: (candidates) => set({ replyCandidates: candidates }),
@@ -69,6 +72,7 @@ export const useChatStore = create<ChatState>((set) => ({
   setShowCandidates: (show) => set({ showCandidates: show }),
   setCurrentFemaleMessage: (message) => set({ currentFemaleMessage: message }),
   setShowIntentOptions: (show) => set({ showIntentOptions: show }),
+  setIsUploadingScreenshot: (isUploading) => set({ isUploadingScreenshot: isUploading }),
   
   updateReplyCandidate: (id, updates) => 
     set((state) => ({

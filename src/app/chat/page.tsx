@@ -21,6 +21,7 @@ export default function Chat() {
     showCandidates,
     currentFemaleMessage,
     showIntentOptions,
+    isUploadingScreenshot,
     setMessage,
     setReplyCandidates,
     setConversations,
@@ -30,13 +31,13 @@ export default function Chat() {
     setError,
     setShowCandidates,
     setCurrentFemaleMessage,
-    setShowIntentOptions,
+    setIsUploadingScreenshot,
     updateReplyCandidate,
     resetChatState
   } = useChatStore();
 
   // スクリーンショットアップロード関連のstate
-  const [isUploadingScreenshot, setIsUploadingScreenshot] = useState(false);
+  //const [isUploadingScreenshot, setIsUploadingScreenshot] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 選択されたターゲットの情報を取得
@@ -279,35 +280,31 @@ export default function Chat() {
     }
   };
 
-  // スクリーンショットアップロード処理（プロフィールと同じ方式）
+  // スクリーンショットアップロード処理（単一画像のみ）
   const handleScreenshotUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0 || !selectedTargetId || !user) return;
+    const file = event.target.files?.[0];
+    if (!file || !selectedTargetId || !user) return;
 
     setIsUploadingScreenshot(true);
     setError(null);
 
     try {
-      // 画像をBase64に変換
-      const imagePromises = Array.from(files).map(file => {
-        return new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
+      // 単一画像をBase64に変換
+      const image = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
       });
 
-      const images = await Promise.all(imagePromises);
-
       // APIを呼び出し
-      const response = await fetch('/api/proxy/screenshot/analyze', {
+      const response = await fetch('/api/analyze-chat-image', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          images,
+          image,
           userId: user.id,
           targetId: selectedTargetId
         })
@@ -319,18 +316,13 @@ export default function Chat() {
 
       const result = await response.json();
 
-      // 保存されたメッセージがある場合は会話履歴を再取得
-      if (result.savedCount > 0) {
-        await fetchConversations();
-      }
+      // 抽出されたメッセージを入力欄に挿入
 
-      // 返信待ちの女性メッセージがある場合は意図選択を表示
-      if (result.pendingFemaleMessage) {
-        setCurrentFemaleMessage(result.pendingFemaleMessage);
-        setShowIntentOptions(true);
-      } else if (!result.savedCount && (!result.newMessages || result.newMessages.length === 0)) {
-        // 新規メッセージが見つからなかった場合
-        setError('新しいメッセージが見つかりませんでした');
+      console.log(result, 'result')
+      if (result.message) {
+        setMessage(result.message);
+      } else {
+        setError('女性のメッセージが見つかりませんでした');
       }
 
       // ファイル入力をリセット
@@ -371,7 +363,7 @@ export default function Chat() {
   return (
     <DefaultLayout>
       <div className="grid grid-rows-[auto_1fr_auto] h-[calc(100dvh-60px)] bg-[#f5f5f5] text-sm">
-        {(isLoading || isLoadingConversations || isGeneratingInitial || isInitializing) && (
+        {(isLoading || isLoadingConversations || isGeneratingInitial || isInitializing || isUploadingScreenshot) && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
             <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-tapple-pink"></div>
           </div>
