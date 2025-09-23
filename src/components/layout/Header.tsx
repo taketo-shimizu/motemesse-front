@@ -1,14 +1,10 @@
 'use client';
 
 import { useSideMenuStore } from '@/store/sideMenu';
-import { useTargetsStore } from '@/store/targets';
 
 export default function Header() {
-  const { openMenu } = useSideMenuStore();
-  const { selectedTargetId, targets } = useTargetsStore();
+  const openMenu = useSideMenuStore(s => s.openMenu);
   
-  const selectedTarget = targets.find(t => t.id === selectedTargetId);
-
   return (
     <header className="bg-white shadow-sm border-b border-gray-100 h-[60px] flex items-center space-x-3 py-3">
         <button

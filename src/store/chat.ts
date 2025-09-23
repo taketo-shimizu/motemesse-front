@@ -33,6 +33,7 @@ interface ChatState {
   showIntentOptions: boolean;
   isUploadingScreenshot: boolean;
   selectedIntent: 'continue' | 'appointment';
+  previousTargetId: number | null;
 
   setMessage: (message: string) => void;
   setReplyCandidates: (candidates: ReplyCandidate[]) => void;
@@ -46,6 +47,7 @@ interface ChatState {
   setShowIntentOptions: (show: boolean) => void;
   setIsUploadingScreenshot: (isUploading: boolean) => void;
   setSelectedIntent: (intent: 'continue' | 'appointment') => void;
+  setPreviousTargetId: (targetId: number | null) => void;
 
   updateReplyCandidate: (id: number, updates: Partial<ReplyCandidate>) => void;
   resetChatState: () => void;
@@ -64,6 +66,7 @@ export const useChatStore = create<ChatState>((set) => ({
   showIntentOptions: false,
   isUploadingScreenshot: false,
   selectedIntent: 'continue',
+  previousTargetId: null,
 
   setMessage: (message) => set({ message }),
   setReplyCandidates: (candidates) => set({ replyCandidates: candidates }),
@@ -77,14 +80,15 @@ export const useChatStore = create<ChatState>((set) => ({
   setShowIntentOptions: (show) => set({ showIntentOptions: show }),
   setIsUploadingScreenshot: (isUploading) => set({ isUploadingScreenshot: isUploading }),
   setSelectedIntent: (intent) => set({ selectedIntent: intent }),
-  
-  updateReplyCandidate: (id, updates) => 
+  setPreviousTargetId: (targetId) => set({ previousTargetId: targetId }),
+
+  updateReplyCandidate: (id, updates) =>
     set((state) => ({
       replyCandidates: state.replyCandidates.map(candidate =>
         candidate.id === id ? { ...candidate, ...updates } : candidate
       )
     })),
-    
+
   resetChatState: () =>
     set({
       showCandidates: false,

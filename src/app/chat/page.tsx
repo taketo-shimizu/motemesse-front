@@ -2,14 +2,29 @@
 
 import DefaultLayout from '@/components/layout/DefaultLayout';
 import { useTargetsStore } from '@/store/targets';
-import { useEffect, useCallback, useState, useRef } from 'react';
+import { useEffect, useLayoutEffect, useCallback, useState, useRef } from 'react';
 import { useUserStore } from '@/store/user';
 import { useChatStore } from '@/store/chat';
+import { useShallow } from 'zustand/shallow';
 
 
 export default function Chat() {
-  const { targets, selectedTargetId, isLoading: isLoadingTargets } = useTargetsStore();
-  const { user, isLoading: isLoadingUser } = useUserStore();
+  const { targets, selectedTargetId, isLoading: isLoadingTargets } = useTargetsStore(
+    useShallow((s) => ({
+      selectedTargetId: s.selectedTargetId,
+      fetchTargets: s.fetchTargets,
+      targets: s.targets,
+      isLoading: s.isLoading,
+    }))
+  );
+
+  const { user, isLoading: isLoadingUser } = useUserStore(
+    useShallow((s) => ({
+      user: s.user,
+      isLoading: s.isLoading,
+    }))
+  );
+
   const {
     message,
     replyCandidates,
@@ -23,6 +38,7 @@ export default function Chat() {
     showIntentOptions,
     isUploadingScreenshot,
     selectedIntent,
+    previousTargetId,
     setMessage,
     setReplyCandidates,
     setConversations,
@@ -34,12 +50,42 @@ export default function Chat() {
     setCurrentFemaleMessage,
     setIsUploadingScreenshot,
     setSelectedIntent,
+    setPreviousTargetId,
     updateReplyCandidate,
     resetChatState
-  } = useChatStore();
+  } = useChatStore(
+    useShallow((s) => ({
+      message: s.message,
+      replyCandidates: s.replyCandidates,
+      conversations: s.conversations,
+      isLoading: s.isLoading,
+      isGeneratingInitial: s.isGeneratingInitial,
+      isLoadingConversations: s.isLoadingConversations,
+      error: s.error,
+      showCandidates: s.showCandidates,
+      currentFemaleMessage: s.currentFemaleMessage,
+      showIntentOptions: s.showIntentOptions,
+      isUploadingScreenshot: s.isUploadingScreenshot,
+      selectedIntent: s.selectedIntent,
+      previousTargetId: s.previousTargetId,
+      setMessage: s.setMessage,
+      setReplyCandidates: s.setReplyCandidates,
+      setConversations: s.setConversations,
+      setIsLoading: s.setIsLoading,
+      setIsGeneratingInitial: s.setIsGeneratingInitial,
+      setIsLoadingConversations: s.setIsLoadingConversations,
+      setError: s.setError,
+      setShowCandidates: s.setShowCandidates,
+      setCurrentFemaleMessage: s.setCurrentFemaleMessage,
+      setIsUploadingScreenshot: s.setIsUploadingScreenshot,
+      setSelectedIntent: s.setSelectedIntent,
+      setPreviousTargetId: s.setPreviousTargetId,
+      updateReplyCandidate: s.updateReplyCandidate,
+      resetChatState: s.resetChatState,
+    }))
+  );
 
   // スクリーンショットアップロード関連のstate
-  //const [isUploadingScreenshot, setIsUploadingScreenshot] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 選択されたターゲットの情報を取得
@@ -69,23 +115,54 @@ export default function Chat() {
       if (response.ok) {
         const data = await response.json();
         setConversations(data);
-        // 会話履歴を取得後、最下部にスクロール
-        scrollToBottom();
       }
     } catch (error) {
       console.error('会話履歴の取得に失敗しました:', error);
     } finally {
       setIsLoadingConversations(false);
     }
-  }, [selectedTargetId, setIsLoadingConversations, setConversations]);
+  }, [selectedTargetId, setConversations, setIsLoadingConversations]);
 
   // ターゲットが変更されたら会話履歴を取得
   useEffect(() => {
-    if (selectedTargetId) {
+    if (selectedTargetId && selectedTargetId !== previousTargetId) {
       fetchConversations();
       resetChatState();
+
+      // 前回の値を更新
+      setPreviousTargetId(selectedTargetId);
+      console.log(selectedTargetId, 'updated previousTargetId');
     }
-  }, [selectedTargetId, fetchConversations, resetChatState]);
+  }, [selectedTargetId, previousTargetId, fetchConversations, resetChatState, setPreviousTargetId]);
+
+  // 会話履歴の更新後にスクロールを最下部に移動
+  useLayoutEffect(() => {
+    console.log(conversations, 'conversations');
+    if (conversations.length > 0) {
+      const chatArea = document.getElementById('chatArea');
+      if (chatArea) {
+        // requestAnimationFrameを使用してより確実にDOMの更新を待つ
+        requestAnimationFrame(() => {
+          chatArea.scrollTop = chatArea.scrollHeight;
+        });
+      }
+    }
+  }, [conversations]);
+
+  // 初回レンダリング後のスクロール処理（他ページからの遷移対応）
+  useLayoutEffect(() => {
+    if (!isInitializing && selectedTarget && conversations.length > 0) {
+      const chatArea = document.getElementById('chatArea');
+      if (chatArea) {
+        // 少し遅延を入れてDOMの完全なレンダリングを待つ
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            chatArea.scrollTop = chatArea.scrollHeight;
+          });
+        });
+      }
+    }
+  }, [isInitializing, selectedTarget]);
 
   // 返信候補を生成
   const handleSendMessage = async () => {
@@ -256,9 +333,6 @@ export default function Chat() {
       // 入力欄をクリア
       setMessage('');
 
-      // 会話保存後、最下部にスクロール
-      scrollToBottom();
-
       console.log('会話が保存されました');
     } catch (error) {
       console.error('会話の保存中にエラーが発生しました:', error);
@@ -383,11 +457,10 @@ export default function Chat() {
             <div className="flex space-x-2">
               <button
                 onClick={() => setSelectedIntent('continue')}
-                className={`px-3 py-1.5 rounded-full font-medium text-xs transition-all ${
-                  selectedIntent === 'continue'
-                    ? 'bg-tapple-pink text-white shadow-sm'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                className={`px-3 py-1.5 rounded-full font-medium text-xs transition-all ${selectedIntent === 'continue'
+                  ? 'bg-tapple-pink text-white shadow-sm'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
               >
                 <span className="flex items-center space-x-1">
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -398,11 +471,10 @@ export default function Chat() {
               </button>
               <button
                 onClick={() => setSelectedIntent('appointment')}
-                className={`px-3 py-1.5 rounded-full font-medium text-xs transition-all ${
-                  selectedIntent === 'appointment'
-                    ? 'bg-tapple-pink text-white shadow-sm'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                className={`px-3 py-1.5 rounded-full font-medium text-xs transition-all ${selectedIntent === 'appointment'
+                  ? 'bg-tapple-pink text-white shadow-sm'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
               >
                 <span className="flex items-center space-x-1">
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

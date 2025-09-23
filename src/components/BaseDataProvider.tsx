@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useTargetsStore } from '@/store/targets';
 import { useUserStore } from '@/store/user';
 import { useUser } from '@auth0/nextjs-auth0/client';
@@ -13,31 +13,42 @@ export default function BaseDataProvider({ children }: { children: React.ReactNo
   const router = useRouter();
   const pathname = usePathname();
 
-  useEffect(() => {
-    // ユーザー情報が読み込まれて、ログインしている場合のみデータを取得
-    if (!userLoading && user) {
-      // ユーザー情報のみ取得
-      syncUser().then(() => {
-        // ユーザー同期後、recent_target_idがある場合はselectedTargetIdに設定
-        const currentUser = useUserStore.getState().user;
+  // 初期化済みかどうかを追跡
+  const isInitialized = useRef(false);
 
-        // プロフィールが未完成の場合はuser-settingページにリダイレクト
-        if (currentUser && (!currentUser.name || !currentUser.age)) {
-          // すでにuser-settingページにいる場合はリダイレクトしない
-          if (pathname !== '/user-setting') {
-            router.push('/user-setting');
-            return;
-          }
-        }
+  // 初期化処理を安定化
+  const initializeApp = useCallback(async () => {
+    if (isInitialized.current) return;
+    if (userLoading || !user) return;
 
-        if (currentUser?.recentTargetId) {
-          setSelectedTargetFromRecentTarget(currentUser.recentTargetId);
+    console.log('BaseDataProvider useEffect');
+    isInitialized.current = true;
+
+    try {
+      await syncUser();
+      const currentUser = useUserStore.getState().user;
+
+      // プロフィールが未完成の場合はuser-settingページにリダイレクト
+      if (currentUser && (!currentUser.name || !currentUser.age)) {
+        // すでにuser-settingページにいる場合はリダイレクトしない
+        if (pathname !== '/user-setting') {
+          router.push('/user-setting');
+          return;
         }
-      }).catch(error => {
-        console.error('Error initializing app data:', error);
-      });
+      }
+
+      if (currentUser?.recentTargetId) {
+        setSelectedTargetFromRecentTarget(currentUser.recentTargetId);
+      }
+    } catch (error) {
+      console.error('Error initializing app data:', error);
+      isInitialized.current = false;
     }
-  }, [user, userLoading, syncUser, setSelectedTargetFromRecentTarget, router, pathname]);
+  }, [user, userLoading, syncUser, pathname, router, setSelectedTargetFromRecentTarget]);
+
+  useEffect(() => {
+    initializeApp();
+  }, [initializeApp]);
 
   return <>{children}</>;
 }

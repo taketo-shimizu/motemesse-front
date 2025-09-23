@@ -1,21 +1,28 @@
 'use client';
 
 import DefaultLayout from '@/components/layout/DefaultLayout';
-import { FiSave, FiCamera } from 'react-icons/fi';
-import { useEffect, useState } from 'react';
+import { FiSave } from 'react-icons/fi';
+import { useEffect } from 'react';
 import { useUserStore } from '@/store/user';
 import { useSettingStore } from '@/store/setting';
 import { useTargetsStore } from '@/store/targets';
 import ImageUploadForProfile from '@/components/ImageUploadForProfile';
 import { ProfileData } from '@/types/profile';
 import { useRouter } from 'next/navigation';
+import { useShallow } from 'zustand/shallow';
 
 export default function MaleSetting() {
-    const { user, updateUser, isLoading: isLoadingUser } = useUserStore();
-    const { isLoading: isLoadingTargets } = useTargetsStore();
     const router = useRouter();
 
-    // Zustandストアから状態を取得
+    const { user, updateUser, isLoading: isLoadingUser } = useUserStore(
+        useShallow((s) => ({
+            user: s.user,
+            updateUser: s.updateUser,
+            isLoading: s.isLoading,
+        }))
+    );
+    const isLoadingTargets = useTargetsStore(s => s.isLoading);
+
     const {
         maleFormData,
         isSaving,
@@ -24,7 +31,17 @@ export default function MaleSetting() {
         setIsSaving,
         updateMaleField,
         setIsUserAnalyzing,
-    } = useSettingStore();
+    } = useSettingStore(
+        useShallow((s) => ({
+            maleFormData: s.maleFormData,
+            isSaving: s.isSaving,
+            isUserAnalyzing: s.isUserAnalyzing,
+            setMaleFormData: s.setMaleFormData,
+            setIsSaving: s.setIsSaving,
+            updateMaleField: s.updateMaleField,
+            setIsUserAnalyzing: s.setIsUserAnalyzing,
+        }))
+    );
 
     // 初回プロフィール設定かどうかを判定
     const isFirstTimeSetup = user && (!user.name || !user.age);

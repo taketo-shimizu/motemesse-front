@@ -9,21 +9,20 @@ import { useUserStore } from '@/store/user';
 import ImageUploadForProfile from '@/components/ImageUploadForProfile';
 import { ProfileData } from '@/types/profile';
 import { useRouter } from 'next/navigation';
+import { useShallow } from 'zustand/shallow';
 
 export default function FemaleSetting() {
-    const { targets, selectedTargetId, fetchTargets, selectTarget, isLoading: isLoadingTargets, newTargetInfo, clearNewTargetInfo } = useTargetsStore();
-    const { syncUser } = useUserStore();
-    const { isLoading: isLoadingUser } = useUserStore();
-    const router = useRouter();
-
-    // ストアから新規作成情報を取得
-    const isNewMode = newTargetInfo?.isNewMode || false;
-    const nameFromStore = newTargetInfo?.name || null;
-
-    // 選択された女性のデータを取得
-    const selectedTarget = targets.find(t => t.id === selectedTargetId);
-
-    // Zustandストアから状態を取得
+    const { targets, selectedTargetId, fetchTargets, selectTarget, isLoading: isLoadingTargets, newTargetInfo, clearNewTargetInfo } = useTargetsStore(
+        useShallow((s) => ({
+            targets: s.targets,
+            selectedTargetId: s.selectedTargetId,
+            fetchTargets: s.fetchTargets,
+            selectTarget: s.selectTarget,
+            isLoading: s.isLoading,
+            newTargetInfo: s.newTargetInfo,
+            clearNewTargetInfo: s.clearNewTargetInfo,
+        }))
+    );
     const {
         femaleFormData,
         isSaving,
@@ -33,7 +32,30 @@ export default function FemaleSetting() {
         updateFemaleField,
         resetFemaleForm,
         setIsFemaleAnalyzing,
-    } = useSettingStore();
+    } = useSettingStore(
+        useShallow((s) => ({
+            femaleFormData: s.femaleFormData,
+            isSaving: s.isSaving,
+            isFemaleAnalyzing: s.isFemaleAnalyzing,
+            setFemaleFormData: s.setFemaleFormData,
+            setIsSaving: s.setIsSaving,
+            updateFemaleField: s.updateFemaleField,
+            resetFemaleForm: s.resetFemaleForm,
+            setIsFemaleAnalyzing: s.setIsFemaleAnalyzing,
+        }))
+    );
+
+    const syncUser = useUserStore(s => s.syncUser);
+    const isLoadingUser = useUserStore(s => s.isLoading);
+
+    const router = useRouter();
+
+    // ストアから新規作成情報を取得
+    const isNewMode = newTargetInfo?.isNewMode || false;
+    const nameFromStore = newTargetInfo?.name || null;
+
+    // 選択された女性のデータを取得
+    const selectedTarget = targets.find(t => t.id === selectedTargetId);
 
     // 選択された女性のデータまたは新規作成モードが変更されたら、フォームを更新
     useEffect(() => {
