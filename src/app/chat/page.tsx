@@ -91,9 +91,6 @@ export default function Chat() {
   // 選択されたターゲットの情報を取得
   const selectedTarget = targets.find(t => t.id === selectedTargetId);
 
-  // 初期化完了の判定
-  const isInitializing = isLoadingUser || isLoadingTargets;
-
   // 会話履歴エリアを最下部にスクロールする関数
   const scrollToBottom = () => {
     const chatArea = document.getElementById('chatArea');
@@ -151,7 +148,7 @@ export default function Chat() {
 
   // 初回レンダリング後のスクロール処理（他ページからの遷移対応）
   useLayoutEffect(() => {
-    if (!isInitializing && selectedTarget && conversations.length > 0) {
+    if (!isLoadingUser && selectedTarget && conversations.length > 0) {
       const chatArea = document.getElementById('chatArea');
       if (chatArea) {
         // 少し遅延を入れてDOMの完全なレンダリングを待つ
@@ -162,7 +159,7 @@ export default function Chat() {
         });
       }
     }
-  }, [isInitializing, selectedTarget]);
+  }, [isLoadingUser, selectedTarget]);
 
   // 返信候補を生成
   const handleSendMessage = async () => {
@@ -442,7 +439,7 @@ export default function Chat() {
   return (
     <DefaultLayout>
       <div className="grid grid-rows-[auto_1fr_auto] h-[calc(100dvh-60px)] bg-[#f5f5f5] text-sm">
-        {(isLoading || isLoadingConversations || isGeneratingInitial || isInitializing || isUploadingScreenshot) && (
+        {(isLoading || isLoadingConversations || isGeneratingInitial || isLoadingUser || isUploadingScreenshot) && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
             <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-tapple-pink"></div>
           </div>
@@ -489,9 +486,9 @@ export default function Chat() {
 
         {/* 会話履歴エリア */}
         <div id="chatArea" className="overflow-y-auto p-3 space-y-4">
-          {isInitializing ? (
+          {isLoadingUser ? (
             <div className="text-center text-gray-500">
-              初期化中...
+              ユーザーデータ読み込み中...
             </div>
           ) : !selectedTarget ? (
             <div className="text-center text-gray-500">
