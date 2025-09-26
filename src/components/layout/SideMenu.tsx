@@ -7,8 +7,7 @@ import { FiX, FiLogOut, FiUser, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { MdChatBubbleOutline } from 'react-icons/md';
 import { useUserStore } from '@/store/user';
 import { useTargetsStore } from '@/store/targets';
-import { useShallow } from 'zustand/shallow';
-
+import { useShallow } from 'zustand/react/shallow';
 export default function SideMenu() {
   const router = useRouter();
 
@@ -36,6 +35,8 @@ export default function SideMenu() {
       clearNewTargetInfo: s.clearNewTargetInfo,
     }))
   );
+
+  const setEssentialTargetUpdate = useTargetsStore(s => s.setEssentialTargetUpdate);
 
   // コンポーネントマウント時にターゲット情報を取得
   useEffect(() => {
@@ -73,6 +74,7 @@ export default function SideMenu() {
 
     try {
       await updateRecentTargetId(targetId);
+      setEssentialTargetUpdate(true);
     } catch (error) {
       console.error('Error updating recent target:', error);
     }
@@ -92,6 +94,7 @@ export default function SideMenu() {
     // プロフィール設定画面に遷移
     router.push('/female-setting');
     closeMenu();
+    setEssentialTargetUpdate(true);
   };
 
   const handleDeleteClick = async () => {

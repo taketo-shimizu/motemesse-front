@@ -9,8 +9,7 @@ import { useTargetsStore } from '@/store/targets';
 import ImageUploadForProfile from '@/components/ImageUploadForProfile';
 import { ProfileData } from '@/types/profile';
 import { useRouter } from 'next/navigation';
-import { useShallow } from 'zustand/shallow';
-
+import { useShallow } from 'zustand/react/shallow';
 export default function MaleSetting() {
     const router = useRouter();
 

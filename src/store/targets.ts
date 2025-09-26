@@ -36,12 +36,14 @@ interface TargetsState {
   isLoading: boolean;
   error: string | null;
   newTargetInfo: NewTargetInfo | null;
+  essentialTargetUpdate: boolean;
   fetchTargets: () => Promise<void>;
   selectTarget: (targetId: number | null) => void;
   handleSelectChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   setSelectedTargetFromRecentTarget: (recentTargetId: number | null) => void;
   setNewTargetInfo: (info: NewTargetInfo) => void;
   clearNewTargetInfo: () => void;
+  setEssentialTargetUpdate: (essentialTargetUpdate: boolean) => void;
 }
 
 export const useTargetsStore = create<TargetsState>((set) => ({
@@ -50,7 +52,7 @@ export const useTargetsStore = create<TargetsState>((set) => ({
   isLoading: false,
   error: null,
   newTargetInfo: null,
-
+  essentialTargetUpdate: true,
   fetchTargets: async () => {
     set({ isLoading: true, error: null });
     try {
@@ -87,5 +89,9 @@ export const useTargetsStore = create<TargetsState>((set) => ({
 
   clearNewTargetInfo: () => {
     set({ newTargetInfo: null });
+  },
+
+  setEssentialTargetUpdate: (essentialTargetUpdate) => {
+    set({ essentialTargetUpdate: essentialTargetUpdate });
   },
 }));

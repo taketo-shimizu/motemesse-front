@@ -5,7 +5,7 @@ import { useTargetsStore } from '@/store/targets';
 import { useEffect, useLayoutEffect, useCallback, useState, useRef } from 'react';
 import { useUserStore } from '@/store/user';
 import { useChatStore } from '@/store/chat';
-import { useShallow } from 'zustand/shallow';
+import { useShallow } from 'zustand/react/shallow';
 
 
 export default function Chat() {
@@ -38,7 +38,7 @@ export default function Chat() {
     showIntentOptions,
     isUploadingScreenshot,
     selectedIntent,
-    previousTargetId,
+    essentialChatUpdate,
     setMessage,
     setReplyCandidates,
     setConversations,
@@ -50,7 +50,7 @@ export default function Chat() {
     setCurrentFemaleMessage,
     setIsUploadingScreenshot,
     setSelectedIntent,
-    setPreviousTargetId,
+    setEssentialChatUpdate,
     updateReplyCandidate,
     resetChatState
   } = useChatStore(
@@ -67,7 +67,7 @@ export default function Chat() {
       showIntentOptions: s.showIntentOptions,
       isUploadingScreenshot: s.isUploadingScreenshot,
       selectedIntent: s.selectedIntent,
-      previousTargetId: s.previousTargetId,
+      essentialChatUpdate: s.essentialChatUpdate,
       setMessage: s.setMessage,
       setReplyCandidates: s.setReplyCandidates,
       setConversations: s.setConversations,
@@ -79,7 +79,7 @@ export default function Chat() {
       setCurrentFemaleMessage: s.setCurrentFemaleMessage,
       setIsUploadingScreenshot: s.setIsUploadingScreenshot,
       setSelectedIntent: s.setSelectedIntent,
-      setPreviousTargetId: s.setPreviousTargetId,
+      setEssentialChatUpdate: s.setEssentialChatUpdate,
       updateReplyCandidate: s.updateReplyCandidate,
       resetChatState: s.resetChatState,
     }))
@@ -122,15 +122,12 @@ export default function Chat() {
 
   // ターゲットが変更されたら会話履歴を取得
   useEffect(() => {
-    if (selectedTargetId && selectedTargetId !== previousTargetId) {
+    if (selectedTargetId && essentialChatUpdate) {
       fetchConversations();
       resetChatState();
-
-      // 前回の値を更新
-      setPreviousTargetId(selectedTargetId);
-      console.log(selectedTargetId, 'updated previousTargetId');
+      setEssentialChatUpdate(false);
     }
-  }, [selectedTargetId, previousTargetId, fetchConversations, resetChatState, setPreviousTargetId]);
+  }, [selectedTargetId, essentialChatUpdate, fetchConversations, resetChatState, setEssentialChatUpdate]);
 
   // 会話履歴の更新後にスクロールを最下部に移動
   useLayoutEffect(() => {

@@ -9,7 +9,7 @@ import { useUserStore } from '@/store/user';
 import ImageUploadForProfile from '@/components/ImageUploadForProfile';
 import { ProfileData } from '@/types/profile';
 import { useRouter } from 'next/navigation';
-import { useShallow } from 'zustand/shallow';
+import { useShallow } from 'zustand/react/shallow';
 
 export default function FemaleSetting() {
     const { targets, selectedTargetId, fetchTargets, selectTarget, isLoading: isLoadingTargets, newTargetInfo, clearNewTargetInfo } = useTargetsStore(
