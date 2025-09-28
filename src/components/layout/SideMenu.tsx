@@ -8,6 +8,7 @@ import { MdChatBubbleOutline } from 'react-icons/md';
 import { useUserStore } from '@/store/user';
 import { useTargetsStore } from '@/store/targets';
 import { useShallow } from 'zustand/react/shallow';
+import { useChatStore } from '@/store/chat';
 export default function SideMenu() {
   const router = useRouter();
 
@@ -36,7 +37,7 @@ export default function SideMenu() {
     }))
   );
 
-  const setEssentialTargetUpdate = useTargetsStore(s => s.setEssentialTargetUpdate);
+  const setEssentialChatUpdate = useChatStore(s => s.setEssentialChatUpdate);
 
   // コンポーネントマウント時にターゲット情報を取得
   useEffect(() => {
@@ -74,7 +75,9 @@ export default function SideMenu() {
 
     try {
       await updateRecentTargetId(targetId);
-      setEssentialTargetUpdate(true);
+
+      // ターゲットが変わったので会話履歴を取得する
+      setEssentialChatUpdate(true);
     } catch (error) {
       console.error('Error updating recent target:', error);
     }
@@ -94,7 +97,6 @@ export default function SideMenu() {
     // プロフィール設定画面に遷移
     router.push('/female-setting');
     closeMenu();
-    setEssentialTargetUpdate(true);
   };
 
   const handleDeleteClick = async () => {
