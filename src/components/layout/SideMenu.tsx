@@ -1,7 +1,6 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect } from 'react';
 import { useSideMenuStore } from '@/store/sideMenu';
 import { FiX, FiLogOut, FiUser, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { MdChatBubbleOutline } from 'react-icons/md';
@@ -25,24 +24,19 @@ export default function SideMenu() {
       updateRecentTargetId: s.updateRecentTargetId,
     }))
   );
-  const { targets, selectedTargetId, selectTarget, fetchTargets, handleSelectChange, setNewTargetInfo, clearNewTargetInfo } = useTargetsStore(
+  const { targets, selectedTargetId, selectTarget, handleSelectChange, setNewTargetInfo, clearNewTargetInfo, removeTargetFromList } = useTargetsStore(
     useShallow((s) => ({
       targets: s.targets,
       selectedTargetId: s.selectedTargetId,
       selectTarget: s.selectTarget,
-      fetchTargets: s.fetchTargets,
       handleSelectChange: s.handleSelectChange,
       setNewTargetInfo: s.setNewTargetInfo,
       clearNewTargetInfo: s.clearNewTargetInfo,
+      removeTargetFromList: s.removeTargetFromList,
     }))
   );
 
   const setEssentialChatUpdate = useChatStore(s => s.setEssentialChatUpdate);
-
-  // コンポーネントマウント時にターゲット情報を取得
-  useEffect(() => {
-    fetchTargets();
-  }, [fetchTargets]);
 
   const handleLogout = () => {
     window.location.href = '/api/auth/logout';
@@ -120,10 +114,11 @@ export default function SideMenu() {
         throw new Error('Failed to delete target');
       }
 
+      // 選択状態をクリア
       selectTarget(null);
 
-      // ターゲット一覧を更新
-      await fetchTargets();
+      // ローカルの配列から削除
+      removeTargetFromList(selectedTargetId);
 
       alert(`${selectedTarget.name}さんを削除しました`);
     } catch (error) {

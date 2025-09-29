@@ -3,7 +3,7 @@
 import DefaultLayout from '@/components/layout/DefaultLayout';
 import { FiSave } from 'react-icons/fi';
 import { useTargetsStore } from '@/store/targets';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useSettingStore } from '@/store/setting';
 import { useUserStore } from '@/store/user';
 import ImageUploadForProfile from '@/components/ImageUploadForProfile';
@@ -12,15 +12,16 @@ import { useRouter } from 'next/navigation';
 import { useShallow } from 'zustand/react/shallow';
 
 export default function FemaleSetting() {
-    const { targets, selectedTargetId, fetchTargets, selectTarget, isLoading: isLoadingTargets, newTargetInfo, clearNewTargetInfo } = useTargetsStore(
+    const { targets, selectedTargetId, selectTarget, isLoading: isLoadingTargets, newTargetInfo, clearNewTargetInfo, addTargetToList, updateTargetInList } = useTargetsStore(
         useShallow((s) => ({
             targets: s.targets,
             selectedTargetId: s.selectedTargetId,
-            fetchTargets: s.fetchTargets,
             selectTarget: s.selectTarget,
             isLoading: s.isLoading,
             newTargetInfo: s.newTargetInfo,
             clearNewTargetInfo: s.clearNewTargetInfo,
+            addTargetToList: s.addTargetToList,
+            updateTargetInList: s.updateTargetInList,
         }))
     );
     const {
@@ -180,7 +181,9 @@ export default function FemaleSetting() {
                 }
 
                 const newTarget = await response.json();
-                await fetchTargets();
+
+                // ローカルの配列に追加
+                addTargetToList(newTarget);
                 selectTarget(newTarget.id);
                 await syncUser(); // ユーザー情報も同期（recent_target_idを更新）
                 alert('保存しました');
@@ -226,10 +229,11 @@ export default function FemaleSetting() {
                 }
 
                 const updatedTarget = await response.json();
-                alert('保存しました');
-                await fetchTargets(); // データを更新
+
+                // ローカルの配列を更新
+                updateTargetInList(updatedTarget);
                 selectTarget(updatedTarget.id); // 更新されたターゲットを選択状態に
-                await syncUser(); // ユーザー情報も同期（recent_target_idを更新）
+                alert('保存しました');
             }
         } catch (error) {
             console.error('Error saving data:', error);

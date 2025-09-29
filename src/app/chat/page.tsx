@@ -12,7 +12,6 @@ export default function Chat() {
   const { targets, selectedTargetId, isLoading: isLoadingTargets } = useTargetsStore(
     useShallow((s) => ({
       selectedTargetId: s.selectedTargetId,
-      fetchTargets: s.fetchTargets,
       targets: s.targets,
       isLoading: s.isLoading,
     }))
@@ -50,7 +49,8 @@ export default function Chat() {
     setIsUploadingScreenshot,
     setEssentialChatUpdate,
     updateReplyCandidate,
-    resetChatState
+    resetChatState,
+    addConversation,
   } = useChatStore(
     useShallow((s) => ({
       message: s.message,
@@ -78,6 +78,7 @@ export default function Chat() {
       setEssentialChatUpdate: s.setEssentialChatUpdate,
       updateReplyCandidate: s.updateReplyCandidate,
       resetChatState: s.resetChatState,
+      addConversation: s.addConversation,
     }))
   );
 
@@ -314,8 +315,9 @@ export default function Chat() {
         throw new Error('会話の保存に失敗しました');
       }
 
-      // 会話履歴を再取得
-      await fetchConversations();
+      const updatedConversation = await response.json();
+
+      addConversation(updatedConversation);
 
       // 返信候補をクリア
       resetChatState();

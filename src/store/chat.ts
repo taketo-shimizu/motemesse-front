@@ -49,6 +49,7 @@ interface ChatState {
 
   updateReplyCandidate: (id: number, updates: Partial<ReplyCandidate>) => void;
   resetChatState: () => void;
+  addConversation: (conversation: Conversation) => void;
 }
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -93,5 +94,11 @@ export const useChatStore = create<ChatState>((set) => ({
       error: null,
       currentFemaleMessage: '',
       showIntentOptions: false
-    })
+  }),
+
+  addConversation: (conversation: Conversation) => {
+    set((state) => ({
+      conversations: [...state.conversations, conversation]
+    }));
+  },
 }));

@@ -44,6 +44,9 @@ interface TargetsState {
   setNewTargetInfo: (info: NewTargetInfo) => void;
   clearNewTargetInfo: () => void;
   setEssentialTargetUpdate: (essentialTargetUpdate: boolean) => void;
+  removeTargetFromList: (targetId: number) => void;
+  addTargetToList: (target: Target) => void;
+  updateTargetInList: (target: Target) => void;
 }
 
 export const useTargetsStore = create<TargetsState>((set) => ({
@@ -93,5 +96,25 @@ export const useTargetsStore = create<TargetsState>((set) => ({
 
   setEssentialTargetUpdate: (essentialTargetUpdate) => {
     set({ essentialTargetUpdate: essentialTargetUpdate });
+  },
+
+  removeTargetFromList: (targetId: number) => {
+    set((state) => ({
+      targets: state.targets.filter(target => target.id !== targetId)
+    }));
+  },
+
+  addTargetToList: (target: Target) => {
+    set((state) => ({
+      targets: [...state.targets, target]
+    }));
+  },
+
+  updateTargetInList: (updatedTarget: Target) => {
+    set((state) => ({
+      targets: state.targets.map(target =>
+        target.id === updatedTarget.id ? updatedTarget : target
+      )
+    }));
   },
 }));

@@ -10,6 +10,7 @@ export default function BaseDataProvider({ children }: { children: React.ReactNo
   const { user, isLoading: userLoading } = useUser();
   const setSelectedTargetFromRecentTarget = useTargetsStore((state) => state.setSelectedTargetFromRecentTarget);
   const syncUser = useUserStore((state) => state.syncUser);
+  const fetchTargets = useTargetsStore((state) => state.fetchTargets);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -25,7 +26,10 @@ export default function BaseDataProvider({ children }: { children: React.ReactNo
     isInitialized.current = true;
 
     try {
-      await syncUser();
+      await Promise.all([
+        syncUser(),
+        fetchTargets()
+      ]);
       const currentUser = useUserStore.getState().user;
 
       // プロフィールが未完成の場合はuser-settingページにリダイレクト
