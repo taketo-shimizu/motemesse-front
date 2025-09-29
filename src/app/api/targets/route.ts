@@ -109,7 +109,6 @@ export async function POST(request: Request) {
         userId: user.id
       }
     });
-    console.log('target', target);
 
     // Update user's recent_target_id to the newly created target
     await prisma.user.update({

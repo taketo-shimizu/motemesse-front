@@ -9,7 +9,7 @@ export async function POST() {
     if (!session?.user) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
-    console.log('session.user', session.user);
+
     const dbUser = await syncAuth0User(session.user);
 
     if (!dbUser) {

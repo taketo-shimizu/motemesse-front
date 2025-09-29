@@ -22,7 +22,6 @@ export default function BaseDataProvider({ children }: { children: React.ReactNo
     if (isInitialized.current) return;
     if (userLoading || !user) return;
 
-    console.log('BaseDataProvider useEffect');
     isInitialized.current = true;
 
     try {

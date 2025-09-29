@@ -24,6 +24,7 @@ export default function Chat() {
     }))
   );
   const initialization = isLoadingTargets || isLoadingUser;
+  console.log('isLoadingTargets', isLoadingTargets);
 
   const {
     message,
@@ -89,17 +90,6 @@ export default function Chat() {
   // 選択されたターゲットの情報を取得
   const selectedTarget = targets.find(t => t.id === selectedTargetId);
 
-  // 会話履歴エリアを最下部にスクロールする関数
-  const scrollToBottom = () => {
-    const chatArea = document.getElementById('chatArea');
-    if (chatArea) {
-      // 少し遅延を入れてDOMの更新を待つ
-      setTimeout(() => {
-        chatArea.scrollTop = chatArea.scrollHeight;
-      }, 100);
-    }
-  };
-
   // 会話履歴を取得
   const fetchConversations = useCallback(async () => {
     if (!selectedTargetId) return;
@@ -129,7 +119,6 @@ export default function Chat() {
 
   // 会話履歴の更新後にスクロールを最下部に移動
   useLayoutEffect(() => {
-    console.log(conversations, 'conversations');
     if (conversations.length > 0) {
       const chatArea = document.getElementById('chatArea');
       if (chatArea) {
@@ -389,7 +378,6 @@ export default function Chat() {
 
       // 抽出されたメッセージを入力欄に挿入
 
-      console.log(result, 'result')
       if (result.message) {
         setMessage(result.message);
       } else {

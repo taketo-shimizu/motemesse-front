@@ -46,6 +46,8 @@ export default function SideMenu() {
 
   const handleSelectChangeWithRecentTarget = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     handleSelectChange(e);
+    // ターゲットが変わったので会話履歴を取得する
+    setEssentialChatUpdate(true);
     const targetIdString = e.target.value;
     const targetId = targetIdString ? parseInt(targetIdString, 10) : null;
 
@@ -57,8 +59,6 @@ export default function SideMenu() {
     try {
       await updateRecentTargetId(targetId);
 
-      // ターゲットが変わったので会話履歴を取得する
-      setEssentialChatUpdate(true);
     } catch (error) {
       console.error('Error updating recent target:', error);
     }
