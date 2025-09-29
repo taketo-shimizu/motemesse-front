@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useSideMenuStore } from '@/store/sideMenu';
 import { FiX, FiLogOut, FiUser, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { MdChatBubbleOutline } from 'react-icons/md';
@@ -42,20 +43,6 @@ export default function SideMenu() {
     window.location.href = '/api/auth/logout';
   };
 
-  const handleProfileUserSettings = () => {
-    router.push('/user-setting');
-    closeMenu();
-  };
-
-  const handleProfileFemaleSettings = () => {
-    router.push('/female-setting');
-    closeMenu();
-  };
-
-  const handleChatHistory = () => {
-    router.push('/chat');
-    closeMenu();
-  };
 
   const handleSelectChangeWithRecentTarget = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     handleSelectChange(e);
@@ -240,56 +227,65 @@ export default function SideMenu() {
             </div>
 
             {/* メニューボタン */}
-            <button
-              onClick={handleChatHistory}
-              className="w-full bg-white hover:bg-gray-50 text-gray-800 p-4 rounded-2xl transition-all flex items-center justify-between group border border-gray-100 hover:border-tapple-pink/30 text-sm"
+            <Link
+              href="/chat"
+              onClick={closeMenu}
+              className="block w-full bg-white hover:bg-gray-50 text-gray-800 p-4 rounded-2xl transition-all border border-gray-100 hover:border-tapple-pink/30 text-sm"
             >
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-gradient-to-br from-tapple-pink/10 to-tapple-pink-light/10 rounded-full flex items-center justify-center mr-3">
-                  <MdChatBubbleOutline className="w-5 h-5 text-tapple-pink" />
+              <div className="flex items-center justify-between group">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-tapple-pink/10 to-tapple-pink-light/10 rounded-full flex items-center justify-center mr-3">
+                    <MdChatBubbleOutline className="w-5 h-5 text-tapple-pink" />
+                  </div>
+                  <span className="font-medium">チャット履歴</span>
                 </div>
-                <span className="font-medium">チャット履歴</span>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-tapple-pink transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </div>
-              <svg className="w-5 h-5 text-gray-400 group-hover:text-tapple-pink transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+            </Link>
 
-            <button
-              onClick={handleProfileUserSettings}
-              className="w-full bg-white hover:bg-gray-50 text-gray-800 p-4 rounded-2xl transition-all flex items-center justify-between group border border-gray-100 hover:border-tapple-pink/30 text-sm"
+            <Link
+              href="/user-setting"
+              onClick={closeMenu}
+              className="block w-full bg-white hover:bg-gray-50 text-gray-800 p-4 rounded-2xl transition-all border border-gray-100 hover:border-tapple-pink/30 text-sm"
             >
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-full flex items-center justify-center mr-3">
-                  <FiUser className="w-5 h-5 text-blue-600" />
+              <div className="flex items-center justify-between group">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-full flex items-center justify-center mr-3">
+                    <FiUser className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div className="text-left">
+                    <span className="font-medium block">プロフィール設定</span>
+                    <span className="text-xs text-gray-500">あなたの情報</span>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <span className="font-medium block">プロフィール設定</span>
-                  <span className="text-xs text-gray-500">あなたの情報</span>
-                </div>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-tapple-pink transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </div>
-              <svg className="w-5 h-5 text-gray-400 group-hover:text-tapple-pink transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+            </Link>
 
-            <button
-              onClick={handleProfileFemaleSettings}
-              className="w-full bg-white hover:bg-gray-50 text-gray-800 p-4 rounded-2xl transition-all flex items-center justify-between group border border-gray-100 hover:border-tapple-pink/30 text-sm"
+            <Link
+              href="/female-setting"
+              onClick={closeMenu}
+              className="block w-full bg-white hover:bg-gray-50 text-gray-800 p-4 rounded-2xl transition-all border border-gray-100 hover:border-tapple-pink/30 text-sm"
             >
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-gradient-to-br from-tapple-pink/10 to-tapple-pink-light/10 rounded-full flex items-center justify-center mr-3">
-                  <FiUser className="w-5 h-5 text-tapple-pink" />
+              <div className="flex items-center justify-between group">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-tapple-pink/10 to-tapple-pink-light/10 rounded-full flex items-center justify-center mr-3">
+                    <FiUser className="w-5 h-5 text-tapple-pink" />
+                  </div>
+                  <div className="text-left">
+                    <span className="font-medium block">プロフィール設定</span>
+                    <span className="text-xs text-gray-500">相手の情報</span>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <span className="font-medium block">プロフィール設定</span>
-                  <span className="text-xs text-gray-500">相手の情報</span>
-                </div>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-tapple-pink transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </div>
-              <svg className="w-5 h-5 text-gray-400 group-hover:text-tapple-pink transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+            </Link>
           </div>
         </div>
 
